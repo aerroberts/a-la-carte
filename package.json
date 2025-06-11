@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "description": "A hungry developer's toolbox",
   "main": "dist/index.js",
+  "bin": {
+    "a": "./dist/index.js"
+  },
   "scripts": {
-    "init": "npm i && npm run build && ./install.sh",
     "build": "tsc",
     "watch": "tsc --watch",
+    "dev": "npm run build && npm link",
+    "link": "npm link",
+    "unlink": "npm unlink -g a-la-carte",
     "ci": "npm run lint && npm run format && npm run check",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",

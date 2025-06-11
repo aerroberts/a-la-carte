@@ -8,14 +8,28 @@ Easily use AI (ollama) to generate and register custom bash command aliases in y
 
 ## Installation
 
+### For Development
+
 ```bash
 # Clone the repository
 git clone https://github.com/eric-aerrobert/a-la-carte.git
 cd a-la-carte
 
-# Add the script to your PATH
-./install.sh
+# Install dependencies and build
+npm install
+npm run build
+
+# Link the package globally for development
+npm link
 ```
+
+### From npm (when published)
+
+```bash
+npm install -g a-la-carte
+```
+
+After installation, you can use the `a` command from anywhere in your terminal.
 
 ## Commands
 
