@@ -1,53 +1,14 @@
 #!/bin/bash
 
-# Define colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" && pwd )"
 BASE_DIR="$(dirname "$SCRIPT_DIR")"
-SCRIPTS_DIR="$BASE_DIR/scripts"
 
-# Check if at least one argument is provided
-if [ $# -lt 1 ]; then
-  echo -e "${BLUE}Available commands:${NC}"
-  echo
-  for script in "$SCRIPTS_DIR"/*.sh; do
-    if [ -f "$script" ]; then
-      name=$(basename "$script" .sh)
-      description=$(sed -n '2s/# //p' "$script")
-      printf "${GREEN}a %-15s${NC} %s\n" "$name" "$description"
-    fi
-  done
-  echo
-  echo -e "${YELLOW}Usage:${NC} a <command> [params...]"
-  exit
-fi
-
-# Extract the command and shift the arguments
-command=$1
-shift
-
-# Handle special commands
-if [ "$command" = "scripts" ]; then
-  open "$SCRIPTS_DIR"
-  exit 0
-fi
-
-# Construct the path to the script
-script_path="$SCRIPTS_DIR/$command.sh"
-
-# Check if the script exists and is executable
-if [ -f "$script_path" ]; then
-  # Make sure the script is executable
-  chmod +x "$script_path"
-  # Invoke the script with the remaining parameters
-  "$script_path" "$@"
+# Check if dist directory exists (compiled TypeScript)
+if [ -d "$BASE_DIR/dist" ]; then
+  # Use compiled JavaScript
+  exec node "$BASE_DIR/dist/index.js" "$@"
 else
-  echo -e "${RED}Error: Command '$command' not found. Script path: '$script_path'${NC}"
+  echo "Error: A La Carte not built. Please run 'npm install && npm run build' first."
   exit 1
 fi

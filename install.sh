@@ -3,10 +3,9 @@
 # Get the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Create symbolic link to the 'a' script in /usr/local/bin
+# Check if command already exists
 if [ -f "/usr/local/bin/a" ]; then
-    echo "Removing existing 'a' command..."
-    sudo rm /usr/local/bin/a
+    echo "Warning: Command 'a' already exists in /usr/local/bin, it will be overwritten"
 fi
 
 echo "Creating symbolic link for 'a' command..."
