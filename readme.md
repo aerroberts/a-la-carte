@@ -8,5 +8,5 @@ A hungry developer's toolbox.
 
 ```bash
 npm i
-npm run link
+npm run dev
 ```
