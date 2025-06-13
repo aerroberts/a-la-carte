@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import type { Command } from "commander";
 import type { CommandRegistration } from "../types";
 import { bash } from "../utils/bash";
@@ -22,10 +23,11 @@ export class ShoveCommand implements CommandRegistration {
         await bash("git push");
 
         const origin = await bash("git remote get-url origin --push");
+        const originRepo = origin.trim().split("https://github.com/")[1];
         const diff = await bash("git log -1 --pretty=tformat: --numstat");
         const [added, deleted, modified] = diff.split("\t").map(Number);
 
-        const log = `Pushing changes to ${origin} for changes to ${modified} files +${added} -${deleted}`;
+        const log = `Pushing changes to ${chalk.bold(originRepo)} for changes to ${chalk.bold(modified)} files +${chalk.green(added)} -${chalk.red(deleted)}`;
         console.log(log);
     }
 }
