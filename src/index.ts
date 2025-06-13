@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { AskClaudeCommand } from "./commands/ai/ask-claude";
 import { CodeShoveCommand } from "./commands/code/shove";
 import { RuleSetSourceCommand } from "./commands/rules/set-src";
 import { RuleSyncCommand } from "./commands/rules/sync";
@@ -13,12 +14,14 @@ function main() {
     // Top-level "code" group command for commands related to coding
     const code = program.command("code").description("Coding related utilities");
     const rules = program.command("rules").description("Natural language rules for AI");
+    const ai = program.command("ai").description("AI related utilities");
 
     // Register subcommands under "code"
     new CodeShoveCommand().register(code);
 
     new RuleSyncCommand().register(rules);
     new RuleSetSourceCommand().register(rules);
+    new AskClaudeCommand().register(ai);
 
     program.parse();
 }

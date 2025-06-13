@@ -42,7 +42,7 @@ export class RuleSyncCommand implements CommandRegistration {
         await bash(`mkdir -p ${tempDir}`);
         await bash(`git clone ${src} ${tempDir}`);
 
-        return { cursorRules: extractContentFromPath(join(tempDir, "cursor-rules")) }
+        return { cursorRules: extractContentFromPath(join(tempDir, "cursor-rules")) };
     }
 
     private async setupCursorRules(cursorRules: Record<string, string>): Promise<void> {
