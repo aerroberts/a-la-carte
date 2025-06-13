@@ -1,9 +1,9 @@
 import chalk from "chalk";
 import type { Command } from "commander";
-import type { CommandRegistration } from "../types";
-import { bash } from "../utils/bash";
+import type { CommandRegistration } from "../../types";
+import { bash } from "../../utils/bash";
 
-export class ShoveCommand implements CommandRegistration {
+export class CodeShoveCommand implements CommandRegistration {
     name = "shove";
     description = "Force pushes your local changes to the remote repository";
 

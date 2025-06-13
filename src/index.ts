@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { ShoveCommand } from "./commands/shove";
+import { CodeShoveCommand } from "./commands/code/shove";
+import { RuleSetSourceCommand } from "./commands/rules/set-src";
+import { RuleSyncCommand } from "./commands/rules/sync";
 
 function main() {
     const program = new Command();
@@ -9,10 +11,14 @@ function main() {
     program.name("a-la-carte").description("A hungry developer's toolbox").version("0.0.1");
 
     // Top-level "code" group command for commands related to coding
-    const code = program.command("code").description("Code related utilities");
+    const code = program.command("code").description("Coding related utilities");
+    const rules = program.command("rules").description("Natural language rules for AI");
 
     // Register subcommands under "code"
-    new ShoveCommand().register(code);
+    new CodeShoveCommand().register(code);
+
+    new RuleSyncCommand().register(rules);
+    new RuleSetSourceCommand().register(rules);
 
     program.parse();
 }

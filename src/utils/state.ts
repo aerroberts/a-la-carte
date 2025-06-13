@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 
 export class ConfigManager {
     private configPath: string;
@@ -28,21 +28,28 @@ export class ConfigManager {
         }
     }
 
-    private saveConfig(): void {
-        this.ensureConfigDir();
-        writeFileSync(this.configPath, JSON.stringify(this.getConfig(), null, 2));
-    }
-
-    loadKey<T>(key: string, defaultValue: T): T {
+    loadKey<T>(key: string, defaultValue?: T): T {
         const config = this.getConfig();
-        return (config[key] as T) ?? defaultValue;
+        const value = config[key] as T;
+        if (value === undefined) {
+            if (defaultValue === undefined) {
+                throw new Error(
+                    `Key ${key} not found in config and no default value provided, please set it first`
+                );
+            }
+            return defaultValue;
+        }
+        return value;
     }
 
     setKey(key: string, value: unknown): void {
         const config = this.getConfig();
         config[key] = value;
-        this.saveConfig();
+        this.ensureConfigDir();
+        writeFileSync(this.configPath, JSON.stringify(config, null, 2));
     }
 }
 
-export const Config = new ConfigManager("~/.a-la-carte/config.json");
+const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
+const configPath = join(homeDir, ".a-la-carte", "config.json");
+export const Config = new ConfigManager(configPath);
