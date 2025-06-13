@@ -20,5 +20,12 @@ export class ShoveCommand implements CommandRegistration {
         await bash("git add -A");
         await bash(`git commit -m "${message}"`);
         await bash("git push");
+
+        const origin = await bash("git remote get-url origin --push");
+        const diff = await bash("git log -1 --pretty=tformat: --numstat");
+        const [added, deleted, modified] = diff.split("\t").map(Number);
+
+        const log = `Pushing changes to ${origin} for changes to ${modified} files +${added} -${deleted}`;
+        console.log(log);
     }
 }
