@@ -55,6 +55,10 @@ export class AskClaudeCommand implements CommandRegistration {
         );
         await bash(`chmod +x ${scriptPath}`);
 
+        console.log(
+            "Claude has been asked to solve the request, it will run in a new terminal window on a copy of your local repository and cut a PR for you when it is done."
+        );
+
         // Open new Terminal window with the script
         await bash(`open -a Terminal ${scriptPath}`);
     }
