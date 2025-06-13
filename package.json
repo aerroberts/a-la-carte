@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "dev": "npm run build && npm link",
+    "dev": "npm run build && npm link && chmod a+x ./dist/index.js",
     "link": "npm link",
     "unlink": "npm unlink -g a-la-carte",
     "ci": "npm run lint && npm run format && npm run check && npm run test:ci",
