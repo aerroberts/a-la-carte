@@ -35,7 +35,7 @@ export class ShoveCommand implements CommandRegistration {
             files++;
         }
 
-        const log = `Pushing changes to ${chalk.bold(originRepo)} for changes to ${chalk.bold(files)} files +${chalk.green(added)} -${chalk.red(deleted)}`;
+        const log = `Pushing changes to ${chalk.whiteBright(originRepo)} for changes to ${chalk.whiteBright(files)} files +${chalk.green(added)} -${chalk.red(deleted)}`;
         console.log(log);
     }
 }
