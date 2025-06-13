@@ -25,9 +25,17 @@ export class ShoveCommand implements CommandRegistration {
         const origin = await bash("git remote get-url origin --push");
         const originRepo = origin.trim().split("https://github.com/")[1];
         const diff = await bash("git log -1 --pretty=tformat: --numstat");
-        const [added, deleted, modified] = diff.split("\t").map(Number);
+        let added = 0;
+        let deleted = 0;
+        let files = 0;
+        for (const line of diff.split("\n").filter(Boolean)) {
+            const [a, d, _] = line.split("\t").map(Number);
+            added += a;
+            deleted += d;
+            files++;
+        }
 
-        const log = `Pushing changes to ${chalk.bold(originRepo)} for changes to ${chalk.bold(modified)} files +${chalk.green(added)} -${chalk.red(deleted)}`;
+        const log = `Pushing changes to ${chalk.bold(originRepo)} for changes to ${chalk.bold(files)} files +${chalk.green(added)} -${chalk.red(deleted)}`;
         console.log(log);
     }
 }
