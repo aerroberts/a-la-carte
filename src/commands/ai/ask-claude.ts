@@ -5,6 +5,15 @@ import { join } from "path";
 import type { CommandRegistration } from "../../types";
 import { bash } from "../../utils/bash";
 
+const ClaudeRequest = (message: string) => `
+    For the following request, please solve it and then open a github PR for me once you are confident that the solution is correct. 
+    Make sure to create a separate branch for the PR and credit yourself for the work in the pr description.
+    When you create your branch, name the branch something like @claude/[todays date]/[2-3 word description of the request] like @claude/2025-06-13/add-a-new-feature
+    <request>
+        ${message}
+    </request>
+`;
+
 export class AskClaudeCommand implements CommandRegistration {
     name = "claude";
     description =
@@ -19,6 +28,7 @@ export class AskClaudeCommand implements CommandRegistration {
                 await this.ask(message);
             });
     }
+
     private async ask(message: string): Promise<void> {
         const commitHash = (await bash("git rev-parse HEAD")).trim();
         const repoUrl = (await bash("git remote get-url origin")).trim();
@@ -40,7 +50,7 @@ export class AskClaudeCommand implements CommandRegistration {
             `Created copy of local repository at ${chalk.whiteBright(aiDir)} for claude to use.`
         );
 
-        const command = `cd ${aiDir} && claude --dangerously-skip-permissions "For the following request, please solve it and then open a github PR for me once you are confident that the solution is correct. Make sure to create a separate branch for the PR and credit yourself for the work in the pr description: ${message}"`;
+        const command = `cd ${aiDir} && claude --dangerously-skip-permissions "${ClaudeRequest(message)}"`;
 
         // Create a temporary shell script to run in the new terminal
         const scriptDir = join(homeDir, ".a-la-carte", "tmp", randomId);
