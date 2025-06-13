@@ -4,6 +4,10 @@
 
 A hungry developer's toolbox.
 
+## Why did the developer go broke?
+
+Because they used up all their cache! 💸
+
 ## Installation
 
 ```bash
