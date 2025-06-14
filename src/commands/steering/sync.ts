@@ -42,7 +42,7 @@ export class SteeringSyncCommand implements CommandRegistration {
 
     private async extractRepoMetadata(src: string): Promise<SteeringSyncResult> {
         const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const tempDir = join(homeDir, ".a-la-carte", "temp", "steering");
+        const tempDir = join(homeDir, ".a-la-carte", "tmp", "steering");
         if (existsSync(tempDir)) {
             await bash(`rm -rf ${tempDir}`);
         }
