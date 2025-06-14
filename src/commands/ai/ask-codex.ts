@@ -3,6 +3,7 @@ import type { Command } from "commander";
 import type { CommandRegistration } from "../../types";
 import { bashInNewTerminal } from "../../utils/bash";
 import { cloneFreshRepo } from "../../utils/clone-repo";
+import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
 import { Config } from "../../utils/state";
 
 export class AskCodexCommand implements CommandRegistration {
@@ -14,10 +15,20 @@ export class AskCodexCommand implements CommandRegistration {
         program
             .command(this.name)
             .description(this.description)
+            .option(
+                "-p, --prompt <name>",
+                "Load a prompt from the steering system (can be used multiple times)",
+                this.collectPrompts,
+                []
+            )
             .argument("<message>", "The message to ask codex")
-            .action(async (message) => {
-                await this.ask(message);
+            .action(async (message: string, options: { prompt: string[] }) => {
+                await this.ask(message, options.prompt);
             });
+    }
+
+    private collectPrompts(value: string, previous: string[]): string[] {
+        return previous.concat([value]);
     }
 
     private async getOpenAiKey(): Promise<string> {
@@ -33,10 +44,21 @@ export class AskCodexCommand implements CommandRegistration {
         return openAiKey;
     }
 
-    private async ask(message: string): Promise<void> {
+    private async ask(message: string, promptNames: string[]): Promise<void> {
+        // Load prompts if any were specified
+        const prompts = loadPrompts(promptNames);
+        const finalMessage = combinePromptsWithMessage(prompts, message);
+
+        if (prompts.length > 0) {
+            console.log(chalk.green(`Using ${prompts.length} prompt(s) with your request`));
+        }
+
         const openAiKey = await this.getOpenAiKey();
         const aiRepoDir = await cloneFreshRepo();
-        await bashInNewTerminal(aiRepoDir, `export OPENAI_API_KEY="${openAiKey}" && codex "${message}"`);
+        await bashInNewTerminal(
+            aiRepoDir,
+            `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
+        );
         console.log("Codex will work in a new terminal window on a copy of your local repository.");
     }
 }

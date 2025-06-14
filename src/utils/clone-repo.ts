@@ -18,7 +18,7 @@ export async function cloneFreshRepo(): Promise<string> {
 
     const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
     const randomId = Math.random().toString(36).substring(2, 15);
-    const aiDir = join(homeDir, ".a-la-carte", "ai", randomId);
+    const aiDir = join(homeDir, ".a-la-carte", "ai-workspaces", randomId);
 
     if (existsSync(aiDir)) {
         await bash(`rm -rf ${aiDir}`);
