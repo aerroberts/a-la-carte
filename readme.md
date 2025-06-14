@@ -4,6 +4,13 @@
 
 A hungry developer's toolbox.
 
+## Usage
+
+```bash
+a ai codex "message"
+a ai claude "message"
+```
+
 ## Installation
 
 ```bash
