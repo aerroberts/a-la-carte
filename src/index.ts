@@ -2,6 +2,8 @@
 
 import { Command } from "commander";
 import { AskClaudeCommand } from "./commands/ai/ask-claude";
+import { AskCodexCommand } from "./commands/ai/ask-codex";
+import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
 import { CodeShoveCommand } from "./commands/code/shove";
 import { RuleSetSourceCommand } from "./commands/rules/set-src";
 import { RuleSyncCommand } from "./commands/rules/sync";
@@ -21,7 +23,10 @@ function main() {
 
     new RuleSyncCommand().register(rules);
     new RuleSetSourceCommand().register(rules);
+
     new AskClaudeCommand().register(ai);
+    new AskCodexCommand().register(ai);
+    new AiSetOpenAiKeyCommand().register(ai);
 
     program.parse();
 }

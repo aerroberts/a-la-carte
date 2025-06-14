@@ -1,18 +1,13 @@
-import chalk from "chalk";
 import type { Command } from "commander";
-import { existsSync } from "fs";
-import { join } from "path";
 import type { CommandRegistration } from "../../types";
-import { bash } from "../../utils/bash";
+import { bashInNewTerminal } from "../../utils/bash";
+import { cloneFreshRepo } from "../../utils/clone-repo";
 
-const ClaudeRequest = (message: string) => `
-    For the following request, please solve it and then open a github PR for me once you are confident that the solution is correct. 
-    Make sure to create a separate branch for the PR and credit yourself for the work in the pr description.
-    When you create your branch, name the branch something like @claude/[todays date]/[2-3 word description of the request] like @claude/2025-06-13/add-a-new-feature
-    <request>
-        ${message}
-    </request>
-`;
+const ClaudeRequest = (message: string) => {
+    // Clean and escape the message to avoid bash issues
+    const cleanMessage = message.replace(/"/g, '\\"').replace(/`/g, "\\`").replace(/\$/g, "\\$");
+    return `For the following request, please solve it and then open a github PR for me once you are confident that the solution is correct. Make sure to create a separate branch for the PR and credit yourself for the work in the pr description. When you create your branch, name the branch something like @claude/[todays date]/[2-3 word description of the request] like @claude/2025-06-13/add-a-new-feature <request> ${cleanMessage} </request>`;
+};
 
 export class AskClaudeCommand implements CommandRegistration {
     name = "claude";
@@ -30,46 +25,8 @@ export class AskClaudeCommand implements CommandRegistration {
     }
 
     private async ask(message: string): Promise<void> {
-        const commitHash = (await bash("git rev-parse HEAD")).trim();
-        const repoUrl = (await bash("git remote get-url origin")).trim();
-
-        console.log(
-            `Your repo is ${chalk.green(repoUrl)} at ${chalk.whiteBright(commitHash)} . . .`
-        );
-
-        const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const randomId = Math.random().toString(36).substring(2, 15);
-        const aiDir = join(homeDir, ".a-la-carte", "ai", randomId);
-        if (existsSync(aiDir)) {
-            await bash(`rm -rf ${aiDir}`);
-        }
-        await bash(`mkdir -p ${aiDir}`);
-
-        await bash(`git clone ${repoUrl} ${aiDir}`);
-        console.log(
-            `Created copy of local repository at ${chalk.whiteBright(aiDir)} for claude to use.`
-        );
-
-        const command = `cd ${aiDir} && claude --dangerously-skip-permissions "${ClaudeRequest(message)}"`;
-
-        // Create a temporary shell script to run in the new terminal
-        const scriptDir = join(homeDir, ".a-la-carte", "tmp", randomId);
-        if (existsSync(scriptDir)) {
-            await bash(`rm -rf ${scriptDir}`);
-        }
-        await bash(`mkdir -p ${scriptDir}`);
-
-        const scriptPath = join(scriptDir, "run_claude.sh");
-        await bash(
-            `echo '#!/bin/bash\n${command}\necho "Press any key to close..."\nread -n 1' > ${scriptPath}`
-        );
-        await bash(`chmod +x ${scriptPath}`);
-
-        console.log(
-            "Claude has been asked to solve the request, it will run in a new terminal window on a copy of your local repository and cut a PR for you when it is done."
-        );
-
-        // Open new Terminal window with the script
-        await bash(`open -a Terminal ${scriptPath}`);
+        const aiRepoDir = await cloneFreshRepo();
+        await bashInNewTerminal(aiRepoDir, `claude --dangerously-skip-permissions "${ClaudeRequest(message)}"`);
+        console.log("Claude will work in a new terminal window on a copy of your local repository . . .");
     }
 }
