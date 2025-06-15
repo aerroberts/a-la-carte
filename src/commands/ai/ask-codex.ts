@@ -9,7 +9,7 @@ import { Config } from "../../utils/state";
 export class AskCodexCommand implements CommandRegistration {
     name = "codex";
     description =
-        "Delegate a request to OpenAI Codex for it to solve. Codex will work on the current repository in a new terminal window.";
+        "Ask OpenAI Codex to help with a request. By default, codex will work in the current workspace. Use --delegate to have codex work in a fresh cloned repository.";
 
     register(program: Command): void {
         program
@@ -21,9 +21,10 @@ export class AskCodexCommand implements CommandRegistration {
                 this.collectPrompts,
                 []
             )
+            .option("-d, --delegate", "Clone the current repository and have codex work in a separate workspace")
             .argument("<message>", "The message to ask codex")
-            .action(async (message: string, options: { prompt: string[] }) => {
-                await this.ask(message, options.prompt);
+            .action(async (message: string, options: { prompt: string[]; delegate?: boolean }) => {
+                await this.ask(message, options.prompt, options.delegate || false);
             });
     }
 
@@ -44,7 +45,7 @@ export class AskCodexCommand implements CommandRegistration {
         return openAiKey;
     }
 
-    private async ask(message: string, promptNames: string[]): Promise<void> {
+    private async ask(message: string, promptNames: string[], delegate: boolean): Promise<void> {
         // Load prompts if any were specified
         const prompts = loadPrompts(promptNames);
         const finalMessage = combinePromptsWithMessage(prompts, message);
@@ -54,11 +55,21 @@ export class AskCodexCommand implements CommandRegistration {
         }
 
         const openAiKey = await this.getOpenAiKey();
-        const aiRepoDir = await cloneFreshRepo();
-        await bashInNewTerminal(
-            aiRepoDir,
-            `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
-        );
-        console.log("Codex will work in a new terminal window on a copy of your local repository.");
+
+        if (delegate) {
+            const aiRepoDir = await cloneFreshRepo();
+            await bashInNewTerminal(
+                aiRepoDir,
+                `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
+            );
+            console.log("Codex will work in a new terminal window on a copy of your local repository.");
+        } else {
+            const currentDir = process.cwd();
+            await bashInNewTerminal(
+                currentDir,
+                `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
+            );
+            console.log("Codex will work in a new terminal window in your current workspace.");
+        }
     }
 }
