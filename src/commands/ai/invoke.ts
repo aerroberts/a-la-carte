@@ -49,6 +49,7 @@ export class AiInvokeCommand implements CommandRegistration {
             const openai = new OpenAI({ apiKey: key });
             const completion = await openai.chat.completions.create({
                 model: "gpt-4.1-2025-04-14",
+                max_tokens: 4096,
                 messages: [{ role: "user", content: finalMessage }],
             });
             const message = completion.choices[0]?.message?.content ?? "";
@@ -59,7 +60,7 @@ export class AiInvokeCommand implements CommandRegistration {
             const key = Config.loadKey<string>("claude-api-key");
             const client = new Anthropic({ apiKey: key });
             const message = await client.messages.create({
-                max_tokens: 1024,
+                max_tokens: 4096,
                 messages: [{ role: "user", content: finalMessage }],
                 model: "claude-sonnet-4-20250514",
             });
