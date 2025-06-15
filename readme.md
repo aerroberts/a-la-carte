@@ -9,6 +9,7 @@ A hungry developer's toolbox.
 ```bash
 a ai codex "message"
 a ai claude "message"
+a code rebase-prs --watch
 ```
 
 ## Installation
