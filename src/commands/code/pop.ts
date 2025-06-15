@@ -12,7 +12,7 @@ export async function popCodeHandler(args: PopArgs): Promise<void> {
 
     const userName = process.env.HOME?.split("/").pop() || "feature";
     const randomHash = Math.random().toString(36).substring(2, 15);
-    const newBranchName = `@${userName}/${randomHash}`;
+    const newBranchName = `${userName}/${randomHash}`;
 
     await bash(`git checkout -b ${newBranchName}`);
     Log.log(`Created new branch ${chalk.whiteBright(newBranchName)}`);
