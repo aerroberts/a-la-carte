@@ -27,7 +27,7 @@ export class AiInvokeCommand implements CommandRegistration {
             const key = Config.loadKey<string>("openai-api-key");
             const openai = new OpenAI({ apiKey: key });
             const completion = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4.1-2025-04-14",
                 messages: [{ role: "user", content }],
             });
             const message = completion.choices[0]?.message?.content ?? "";
@@ -38,10 +38,10 @@ export class AiInvokeCommand implements CommandRegistration {
             const message = await client.messages.create({
                 max_tokens: 1024,
                 messages: [{ role: "user", content }],
-                model: "claude-3-5-sonnet-latest",
+                model: "claude-sonnet-4-20250514",
             });
             const text = Array.isArray(message.content)
-                ? message.content.map((c) => (typeof c === "string" ? c : c.text)).join("\n")
+                ? message.content.map((c) => (typeof c === "string" ? c : c.type === "text" ? c.text : "")).join("\n")
                 : String(message.content);
             console.log(text.trim());
         } else {
