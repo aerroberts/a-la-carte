@@ -8,7 +8,7 @@ import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
 export class AskClaudeCommand implements CommandRegistration {
     name = "claude";
     description =
-        "Delegate a request to claude for it to solve. Claude will clone the current repository and solve the request then open a PR for you.";
+        "Ask claude to help with a request. By default, claude will work in the current workspace. Use --delegate to have claude work in a fresh cloned repository.";
 
     register(program: Command): void {
         program
@@ -20,9 +20,10 @@ export class AskClaudeCommand implements CommandRegistration {
                 this.collectPrompts,
                 []
             )
+            .option("-d, --delegate", "Clone the current repository and have claude work in a separate workspace")
             .argument("<message>", "The message to ask claude")
-            .action(async (message: string, options: { prompt: string[] }) => {
-                await this.ask(message, options.prompt);
+            .action(async (message: string, options: { prompt: string[]; delegate?: boolean }) => {
+                await this.ask(message, options.prompt, options.delegate || false);
             });
     }
 
@@ -30,7 +31,7 @@ export class AskClaudeCommand implements CommandRegistration {
         return previous.concat([value]);
     }
 
-    private async ask(message: string, promptNames: string[]): Promise<void> {
+    private async ask(message: string, promptNames: string[], delegate: boolean): Promise<void> {
         // Load prompts if any were specified
         const prompts = loadPrompts(promptNames);
         const finalMessage = combinePromptsWithMessage(prompts, message);
@@ -39,8 +40,14 @@ export class AskClaudeCommand implements CommandRegistration {
             console.log(chalk.green(`Using ${prompts.length} prompt(s) with your request`));
         }
 
-        const aiRepoDir = await cloneFreshRepo();
-        await bashInNewTerminal(aiRepoDir, `claude --dangerously-skip-permissions "${finalMessage}"`);
-        console.log("Claude will work in a new terminal window on a copy of your local repository . . .");
+        if (delegate) {
+            const aiRepoDir = await cloneFreshRepo();
+            await bashInNewTerminal(aiRepoDir, `claude --dangerously-skip-permissions "${finalMessage}"`);
+            console.log("Claude will work in a new terminal window on a copy of your local repository . . .");
+        } else {
+            const currentDir = process.cwd();
+            await bashInNewTerminal(currentDir, `claude --dangerously-skip-permissions "${finalMessage}"`);
+            console.log("Claude will work in a new terminal window in your current workspace . . .");
+        }
     }
 }
