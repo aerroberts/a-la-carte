@@ -24,10 +24,10 @@ export async function popCodeHandler(args: PopArgs): Promise<void> {
     await bash(`git push -u origin ${newBranchName}`);
     Log.log(`Pushed changes to remote branch ${chalk.whiteBright(newBranchName)}`);
     const prOutput = await bash(
-        `gh pr create --title "${args.message || "Code Changes"}" --body "Automatically created PR from cli"`
+        `gh pr create --base main --head ${newBranchName} --title "${args.message || "Code Changes"}" --body "Automatically created PR from cli"`
     );
     const prUrl = prOutput.match(/https:\/\/github\.com\/[^\s]+/)?.[0];
-    Log.log(`Created Pull Request for branch ${chalk.whiteBright(newBranchName)}`);
+    Log.log(`Created Pull Request for branch ${chalk.whiteBright(newBranchName)} into ${chalk.whiteBright("main")}`);
 
     await bash("git checkout -");
     Log.log("Switched back to previous branch without changes");
