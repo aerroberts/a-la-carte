@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { bash } from "../../utils/bash";
+import { logDiffStats } from "../../utils/diff";
 import { Log } from "../../utils/logger";
 
 export interface ShoveArgs {
@@ -13,22 +14,9 @@ export async function shoveCodeHandler(args: ShoveArgs): Promise<void> {
 
     await bash("git add -A");
     await bash(`git commit -m "${args.message || "Shoving changes"}"`);
-    const diff = await bash("git log -1 --pretty=tformat: --numstat");
-    let added = 0;
-    let deleted = 0;
-    let files = 0;
-    for (const line of diff.split("\n").filter(Boolean)) {
-        const [a, d, _] = line.split("\t").map(Number);
-        added += a;
-        deleted += d;
-        files++;
-    }
     await bash("git push");
 
-    Log.log(
-        `Pushed changes to ${chalk.whiteBright(originRepo)} for changes to ${chalk.whiteBright(files)} files +${chalk.green(
-            added
-        )} -${chalk.red(deleted)}`
-    );
+    await logDiffStats();
+    Log.log(`Pushed changes to ${chalk.whiteBright(originRepo)}`);
     Log.success("Shoved changes");
 }
