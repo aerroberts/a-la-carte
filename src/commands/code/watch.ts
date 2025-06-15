@@ -14,21 +14,19 @@ export class CodeWatchCommand implements CommandRegistration {
         program
             .command(this.name)
             .description(this.description)
-            .argument("<condition>", "Watch condition (e.g., 'when file-edit *.ts')")
-            .argument("<command...>", "Command to execute when condition is met")
-            .action(async (condition: string, commandParts: string[]) => {
-                await this.watch(condition, commandParts.join(" "));
+            .argument("<pattern>", "File pattern to watch (e.g., '*.ts', '**/*.js')")
+            .argument("<command...>", "Command to execute when files change")
+            .action(async (pattern: string, commandParts: string[]) => {
+                await this.watch(pattern, commandParts.join(" "));
             });
     }
 
-    private async watch(condition: string, command: string): Promise<void> {
-        const parsed = this.parseCondition(condition);
-        if (!parsed) {
-            console.error(chalk.red("Invalid condition. Use format: 'when file-edit <pattern>'"));
+    private async watch(pattern: string, command: string): Promise<void> {
+        if (!pattern || !command) {
+            console.error(chalk.red("Invalid arguments. Usage: a code watch \"<pattern>\" \"<command>\""));
             process.exit(1);
         }
 
-        const { pattern } = parsed;
         console.log(chalk.blue(`Watching for changes in files matching: ${pattern}`));
         console.log(chalk.blue(`Will execute: ${command}`));
         console.log(chalk.gray("Press Ctrl+C to stop watching\n"));
@@ -36,13 +34,6 @@ export class CodeWatchCommand implements CommandRegistration {
         await this.startWatching(pattern, command);
     }
 
-    private parseCondition(condition: string): { pattern: string } | null {
-        const parts = condition.split(" ");
-        if (parts.length !== 3 || parts[0] !== "when" || parts[1] !== "file-edit") {
-            return null;
-        }
-        return { pattern: parts[2] };
-    }
 
     private async startWatching(pattern: string, command: string): Promise<void> {
         const debounceMs = 1000;
