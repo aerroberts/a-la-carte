@@ -12,11 +12,8 @@ import { popCodeHandler } from "./commands/code/pop";
 import { type PopulateDescriptionArgs, populateDescriptionAction } from "./commands/code/populate-description";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
-import { type AddPromptArgs, addPromptCommand } from "./commands/config/add-prompt";
-import { type ListPromptsArgs, listPromptsCommand } from "./commands/config/list-prompts";
-import { type OpenConfigArgs, openConfigCommand } from "./commands/config/open";
-import { type SetSourceArgs, setSource } from "./commands/config/set-source";
-import { type SyncArgs, syncConfig } from "./commands/config/sync";
+import { listPromptsConfigHandler } from "./commands/config/list-prompts";
+import { showConfigHandler } from "./commands/config/show";
 
 function main() {
     const program = new Command();
@@ -55,47 +52,14 @@ function main() {
 
     // config commands
     config
-        .command("sync")
-        .description("Sync configuration from a remote git repository")
-        .action(async () => {
-            const args: SyncArgs = {};
-            await syncConfig(args);
-        });
-
-    config
-        .command("set-source")
-        .description("Set the source URL for configuration syncing")
-        .argument("<url>", "The git repository URL to sync configuration from")
-        .action(async (url: string) => {
-            const args: SetSourceArgs = { url };
-            await setSource(args);
-        });
-
-    config
-        .command("add-prompt")
-        .description("Adds a new prompt with the specified name and content")
-        .argument("<name>", "The name of the prompt")
-        .argument("<content>", "The content/text of the prompt")
-        .action(async (name: string, content: string) => {
-            const args: AddPromptArgs = { name, content };
-            await addPromptCommand(args);
-        });
-
-    config
         .command("list-prompts")
         .description("List all available prompts")
-        .action(async () => {
-            const args: ListPromptsArgs = {};
-            await listPromptsCommand(args);
-        });
+        .action(() => listPromptsConfigHandler({}));
 
     config
-        .command("open")
-        .description("Open the configuration file in your default editor")
-        .action(async () => {
-            const args: OpenConfigArgs = {};
-            await openConfigCommand(args);
-        });
+        .command("show")
+        .description("Shows info about the current config")
+        .action(() => showConfigHandler({}));
 
     // ai commands
     ai.command("claude")

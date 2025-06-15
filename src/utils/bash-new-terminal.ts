@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { bash } from "./bash";
 import { Log } from "./logger";
-import { saveToTmp } from "./tmp";
+import { saveToTmp } from "./saveToTmp";
 
 interface BashInNewTerminalOptions {
     command: string;

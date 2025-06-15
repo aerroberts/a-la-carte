@@ -1,35 +1,22 @@
-import { existsSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import chalk from "chalk";
+import { Log } from "../../utils/logger";
 
 export interface ListPromptsArgs {}
 
-function listPrompts(): void {
-    const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-    const promptsDir = join(homeDir, ".a-la-carte", "prompts");
+export async function listPromptsConfigHandler(_: ListPromptsArgs): Promise<void> {
+    Log.info("Listing prompts");
+    const promptDir = join(dirname(__filename), "..", "..", "..", "prompts");
+    Log.log(`Prompts directory: ${chalk.whiteBright(promptDir)}`);
 
-    if (!existsSync(promptsDir)) {
-        console.log(chalk.yellow("No prompts directory found. Create one using:"));
-        console.log(chalk.whiteBright("  a config add-prompt <name> <content>"));
-        return;
-    }
-
-    const files = readdirSync(promptsDir);
+    const files = readdirSync(promptDir);
     const promptFiles = files.filter((file) => file.endsWith(".md"));
 
     if (promptFiles.length === 0) {
-        console.log(chalk.yellow("No prompts found. Add one using:"));
-        console.log(chalk.whiteBright("  a config add-prompt <name> <content>"));
+        Log.warning("No prompts found");
         return;
     }
 
-    console.log(chalk.green("Available prompts:"));
-    for (const file of promptFiles) {
-        const promptName = file.replace(".md", "");
-        console.log(chalk.whiteBright(`  ${promptName}`));
-    }
-}
-
-export async function listPromptsCommand(_: ListPromptsArgs): Promise<void> {
-    listPrompts();
+    Log.log(`Available prompts: ${chalk.green(promptFiles.map((file) => file.replace(".md", "")).join(", "))}`);
 }
