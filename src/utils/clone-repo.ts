@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
 import { bash } from "./bash";
+import { Log } from "./logger";
 
 export async function cloneFreshRepo(): Promise<string> {
     const commitHashRaw = await bash("git rev-parse HEAD");
@@ -9,7 +10,7 @@ export async function cloneFreshRepo(): Promise<string> {
     const repoUrlRaw = await bash("git remote get-url origin");
     const repoUrl = repoUrlRaw.trim();
 
-    console.log(`Your repo is ${chalk.green(repoUrl)} at ${chalk.whiteBright(commitHash)} . . .`);
+    Log.log(`Cloning repo ${chalk.whiteBright(repoUrl)} . . .`);
 
     const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
     const randomId = Math.random().toString(36).substring(2, 15);
