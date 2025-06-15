@@ -1,35 +1,44 @@
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
 import type { Command } from "commander";
-import type { CommandRegistration } from "../../types";
+import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
 
-export class ConfigOpenCommand implements CommandRegistration {
-    name = "open";
-    description = "Opens the config metadata directory (prompts) in the file system";
+async function openConfig(): Promise<void> {
+    const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
+    const configDir = join(homeDir, ".a-la-carte");
+    const configFile = join(configDir, "config.json");
 
-    register(program: Command): void {
-        program
-            .command(this.name)
-            .description(this.description)
-            .action(async () => {
-                await this.openMetadataDirectory();
-            });
+    // Ensure the config directory exists
+    if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+        console.log(chalk.green(`Created config directory: ${chalk.whiteBright(configDir)}`));
     }
 
-    private async openMetadataDirectory(): Promise<void> {
-        const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const promptsDir = join(homeDir, ".a-la-carte", "prompts");
+    // Ensure the config file exists
+    if (!existsSync(configFile)) {
+        writeFileSync(configFile, "{}", "utf-8");
+        console.log(chalk.green(`Created config file: ${chalk.whiteBright(configFile)}`));
+    }
 
-        // Ensure the prompts directory exists
-        if (!existsSync(promptsDir)) {
-            mkdirSync(promptsDir, { recursive: true });
-            console.log(chalk.green(`Created prompts directory: ${chalk.whiteBright(promptsDir)}`));
-        }
-
-        // Open the directory in the default file manager
-        await bash(`open "${promptsDir}"`);
-        console.log(chalk.green(`Opened config metadata directory: ${chalk.whiteBright(promptsDir)}`));
+    // Open the config file with the default editor
+    try {
+        const editor = process.env.EDITOR || "code";
+        await bash(`${editor} "${configFile}"`);
+        console.log(chalk.green("Opened configuration file"));
+    } catch (error) {
+        console.log(chalk.red("Error opening config file:"));
+        console.log(error);
+        console.log(chalk.yellow(`You can manually edit the config file at: ${configFile}`));
     }
 }
+
+export const registerOpenCommand: CommandRegistrator = (program: Command): void => {
+    program
+        .command("open")
+        .description("Open the configuration file in your default editor")
+        .action(async () => {
+            await openConfig();
+        });
+};

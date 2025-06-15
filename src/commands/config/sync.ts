@@ -1,103 +1,52 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
 import type { Command } from "commander";
-import type { CommandRegistration } from "../../types";
-import { bash } from "../../utils/bash";
-import { extractContentFromPath } from "../../utils/files";
+import type { CommandRegistrator } from "../../types";
 import { Config } from "../../utils/state";
 
-interface ConfigSyncResult {
-    cursorRules: Record<string, string>;
-    prompts: Record<string, string>;
-    githubWorkflows: Record<string, string>;
+async function sync(): Promise<void> {
+    try {
+        const source = Config.loadKey<string>("config-source");
+        const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
+        const configDir = join(homeDir, ".a-la-carte");
+
+        // Ensure the .a-la-carte directory exists
+        if (!existsSync(configDir)) {
+            mkdirSync(configDir, { recursive: true });
+        }
+
+        console.log(chalk.blue(`Syncing configuration from: ${chalk.whiteBright(source)}`));
+
+        // Clone or pull the repository
+        const repoPath = join(configDir, "config-repo");
+        if (existsSync(repoPath)) {
+            console.log(chalk.yellow("Configuration repository already exists, pulling latest changes..."));
+            execSync("git pull", { cwd: repoPath, stdio: "inherit" });
+        } else {
+            console.log(chalk.yellow("Cloning configuration repository..."));
+            execSync(`git clone "${source}" config-repo`, { cwd: configDir, stdio: "inherit" });
+        }
+
+        console.log(chalk.green("Configuration synced successfully!"));
+    } catch (error) {
+        if (error instanceof Error && error.message.includes("config-source")) {
+            console.log(chalk.red("Error: Configuration source not set."));
+            console.log(chalk.yellow("Please set your configuration source first using:"));
+            console.log(chalk.whiteBright("  a config set-source <git-repository-url>"));
+        } else {
+            console.log(chalk.red("Error syncing configuration:"));
+            console.log(error);
+        }
+    }
 }
 
-export class ConfigSyncCommand implements CommandRegistration {
-    name = "sync";
-    description = "Syncs the config rules and prompts from the configured source into the current environment";
-
-    register(program: Command): void {
-        program
-            .command(this.name)
-            .description(this.description)
-            .action(async () => {
-                await this.syncConfig();
-            });
-    }
-
-    private async syncConfig(): Promise<void> {
-        const src = Config.loadKey("config-src", "");
-        console.log(chalk.green(`Syncing config from ${chalk.whiteBright(src)} . . .`));
-
-        if (!src) {
-            console.log(chalk.red("No config source configured. Please set a config source using:"));
-            console.log(chalk.whiteBright("  a config set-source <url>"));
-            process.exit(1);
-        }
-
-        const { cursorRules, prompts, githubWorkflows } = await this.extractRepoMetadata(src as string);
-        await this.setupCursorRules(cursorRules);
-        await this.setupPrompts(prompts);
-        await this.setupGithubWorkflows(githubWorkflows);
-    }
-
-    private async extractRepoMetadata(src: string): Promise<ConfigSyncResult> {
-        const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const tempDir = join(homeDir, ".a-la-carte", "tmp", "config");
-        if (existsSync(tempDir)) {
-            await bash(`rm -rf ${tempDir}`);
-        }
-        await bash(`mkdir -p ${tempDir}`);
-        await bash(`git clone ${src} ${tempDir}`);
-
-        const cursorRules = extractContentFromPath(join(tempDir, "cursor-rules"));
-        const prompts = extractContentFromPath(join(tempDir, "prompts"));
-        const githubWorkflows = extractContentFromPath(join(tempDir, ".github", "workflows"));
-
-        return { cursorRules, prompts, githubWorkflows };
-    }
-
-    private async setupCursorRules(cursorRules: Record<string, string>): Promise<void> {
-        const cursorRulesDir = join(process.cwd(), ".cursor", "rules");
-        if (!existsSync(cursorRulesDir)) {
-            mkdirSync(cursorRulesDir, { recursive: true });
-        }
-
-        for (const [fileName, content] of Object.entries(cursorRules)) {
-            const targetPath = join(cursorRulesDir, fileName);
-            writeFileSync(targetPath, content);
-            console.log(chalk.gray(`- synced cursor rule: ${chalk.whiteBright(fileName)}`));
-        }
-        console.log(chalk.green("Successfully synced all cursor rules!"));
-    }
-
-    private async setupPrompts(prompts: Record<string, string>): Promise<void> {
-        const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const promptsDir = join(homeDir, ".a-la-carte", "prompts");
-        if (!existsSync(promptsDir)) {
-            mkdirSync(promptsDir, { recursive: true });
-        }
-
-        for (const [fileName, content] of Object.entries(prompts)) {
-            const targetPath = join(promptsDir, fileName);
-            writeFileSync(targetPath, content);
-            console.log(chalk.gray(`- synced prompt: ${chalk.whiteBright(fileName)}`));
-        }
-        console.log(chalk.green("Successfully synced all prompts!"));
-    }
-
-    private async setupGithubWorkflows(githubWorkflows: Record<string, string>): Promise<void> {
-        const githubWorkflowsDir = join(process.cwd(), ".github", "workflows");
-        if (!existsSync(githubWorkflowsDir)) {
-            mkdirSync(githubWorkflowsDir, { recursive: true });
-        }
-
-        for (const [fileName, content] of Object.entries(githubWorkflows)) {
-            const targetPath = join(githubWorkflowsDir, fileName);
-            writeFileSync(targetPath, content);
-            console.log(chalk.gray(`- synced github workflow: ${chalk.whiteBright(fileName)}`));
-        }
-        console.log(chalk.green("Successfully synced all github workflows!"));
-    }
-}
+export const registerSyncCommand: CommandRegistrator = (program: Command): void => {
+    program
+        .command("sync")
+        .description("Sync configuration from a remote git repository")
+        .action(async () => {
+            await sync();
+        });
+};

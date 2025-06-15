@@ -23,7 +23,6 @@ function main() {
 
     program.name("a-la-carte").description("A hungry developer's toolbox").version("0.0.1");
 
-    // Top-level "code" group command for commands related to coding
     const code = program.command("code").description("Coding related utilities");
     const config = program.command("config").description("Config rules and prompts management");
     const ai = program.command("ai").description("AI related utilities");

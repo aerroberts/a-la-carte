@@ -1,73 +1,60 @@
 import chalk from "chalk";
 import type { Command } from "commander";
-import type { CommandRegistration } from "../../types";
+import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
 
-export class CodeRebasePrsCommand implements CommandRegistration {
-    name = "rebase-prs";
-    description = "Merges the default branch into all your open pull requests";
+async function rebasePrs(): Promise<void> {
+    try {
+        console.log(chalk.blue("Fetching latest changes from origin..."));
+        await bash("git fetch origin");
 
-    register(program: Command): void {
-        program
-            .command(this.name)
-            .description(this.description)
-            .option("-w, --watch", "Keep rebasing every minute until stopped")
-            .action(async (options: { watch?: boolean }) => {
-                await this.rebasePrs(Boolean(options.watch));
-            });
-    }
+        // Get all open PRs
+        const prList = await bash("gh pr list --state open --json number,headRefName");
+        const prs = JSON.parse(prList);
 
-    private async listOpenPrs(): Promise<{ repo: string; number: number; title: string }[]> {
-        const query = `{
-            viewer {
-                pullRequests(first: 100, states: OPEN, orderBy: {field: UPDATED_AT, direction: DESC}) {
-                    nodes {
-                        number
-                        title
-                        repository { nameWithOwner }
-                    }
-                }
-            }
-        }`;
-
-        const escaped = query.replace(/'/g, "\\'").replace(/\n/g, " ").trim();
-        const raw = await bash(`gh api graphql -f query='${escaped}'`);
-
-        try {
-            const data = JSON.parse(raw);
-            const nodes = data.data.viewer.pullRequests.nodes as Array<{
-                number: number;
-                title: string;
-                repository: { nameWithOwner: string };
-            }>;
-            return nodes.map((n) => ({ repo: n.repository.nameWithOwner, number: n.number, title: n.title }));
-        } catch {
-            console.log(chalk.red("Failed to parse output from gh"));
-            return [];
+        if (prs.length === 0) {
+            console.log(chalk.yellow("No open PRs found"));
+            return;
         }
-    }
 
-    private async updatePr(pr: { repo: string; number: number; title: string }): Promise<void> {
-        try {
-            await bash(`gh api -X PUT repos/${pr.repo}/pulls/${pr.number}/update-branch`);
-            console.log(chalk.green(`Updated ${pr.repo}#${pr.number}: ${chalk.whiteBright(pr.title)}`));
-        } catch (err) {
-            console.log(chalk.yellow(`Could not update ${pr.repo}#${pr.number}: ${err}`));
+        console.log(chalk.green(`Found ${prs.length} open PR(s)`));
+
+        for (const pr of prs) {
+            const branchName = pr.headRefName;
+            const prNumber = pr.number;
+
+            console.log(chalk.blue(`\nRebasing PR #${prNumber} (${branchName})...`));
+
+            try {
+                // Checkout the PR branch
+                await bash(`git checkout ${branchName}`);
+
+                // Rebase against main
+                await bash("git rebase origin/main");
+
+                // Force push the rebased branch
+                await bash(`git push --force-with-lease origin ${branchName}`);
+
+                console.log(chalk.green(`✓ Successfully rebased PR #${prNumber}`));
+            } catch (error) {
+                console.log(chalk.red(`✗ Failed to rebase PR #${prNumber}: ${error}`));
+            }
         }
-    }
 
-    private async rebasePrs(watch: boolean): Promise<void> {
-        do {
-            const prs = await this.listOpenPrs();
-            if (prs.length === 0) {
-                console.log(chalk.green("No open pull requests found"));
-            }
-            for (const pr of prs) {
-                await this.updatePr(pr);
-            }
-            if (watch) {
-                await new Promise((r) => setTimeout(r, 60000));
-            }
-        } while (watch);
+        // Return to main branch
+        await bash("git checkout main");
+        console.log(chalk.green("\nRebase operation completed"));
+    } catch (error) {
+        console.log(chalk.red("Error during rebase operation:"));
+        console.log(error);
     }
 }
+
+export const registerRebasePrsCommand: CommandRegistrator = (program: Command): void => {
+    program
+        .command("rebase-prs")
+        .description("Rebase all open pull requests against the main branch")
+        .action(async () => {
+            await rebasePrs();
+        });
+};
