@@ -1,57 +1,37 @@
 import chalk from "chalk";
-import { bashInNewTerminal } from "../../utils/bash-new-terminal";
+import { bashInheritCurrentTerminal, bashInNewTerminal } from "../../utils/bash";
 import { cloneFreshRepo } from "../../utils/clone-repo";
+import { Log } from "../../utils/logger";
 import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
-import { Config } from "../../utils/state";
 
 export interface AskCodexArgs {
-    message: string;
-    prompt: string[];
-    delegate: boolean;
+    request?: string;
+    prompts?: string[];
+    freshRepo?: boolean;
 }
 
-async function getOpenAiKey(): Promise<string> {
-    let openAiKey: string;
-    try {
-        openAiKey = Config.loadKey<string>("openai-api-key");
-    } catch {
-        console.log(chalk.red("Error: OpenAI API key not configured."));
-        console.log(chalk.yellow("Please set your OpenAI API key first using:"));
-        console.log(chalk.whiteBright("  a ai set-openai-key <your-api-key>"));
-        process.exit(1);
-    }
-    return openAiKey;
-}
+export async function askCodexAiHandler(args: AskCodexArgs): Promise<void> {
+    Log.info("Asking Codex for help");
 
-async function ask(message: string, promptNames: string[], delegate: boolean): Promise<void> {
-    // Load prompts if any were specified
-    const prompts = loadPrompts(promptNames);
-    const finalMessage = combinePromptsWithMessage(prompts, message);
+    const prompts = loadPrompts(args.prompts || []);
+    const finalMessage = combinePromptsWithMessage(prompts, args.request || "");
 
     if (prompts.length > 0) {
         console.log(chalk.green(`Using ${prompts.length} prompt(s) with your request`));
     }
 
-    const openAiKey = await getOpenAiKey();
-
-    if (delegate) {
+    if (args.freshRepo) {
+        Log.log("Cloning fresh repository for Codex to work in");
         const aiRepoDir = await cloneFreshRepo();
         await bashInNewTerminal({
-            command: `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`,
+            command: `codex --full-auto "${finalMessage}"`,
             dir: aiRepoDir,
         });
-        console.log("Codex will work in a new terminal window on a copy of your local repository.");
+        Log.log(`Codex will work in a new terminal window in ${aiRepoDir}`);
     } else {
-        const currentDir = process.cwd();
-        await bashInNewTerminal({
-            command: `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`,
-            dir: currentDir,
+        await bashInheritCurrentTerminal({
+            command: "codex",
+            parameters: ["--full-auto", finalMessage],
         });
-        console.log("Codex will work in a new terminal window in your current workspace.");
     }
-}
-
-export async function askCodex(args: AskCodexArgs): Promise<void> {
-    const { message, prompt, delegate } = args;
-    await ask(message, prompt, delegate);
 }

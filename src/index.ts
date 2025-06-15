@@ -2,7 +2,7 @@
 
 import { Command } from "commander";
 import { askClaudeAiHander } from "./commands/ai/ask-claude";
-import { type AskCodexArgs, askCodex } from "./commands/ai/ask-codex";
+import { askCodexAiHandler } from "./commands/ai/ask-codex";
 import { describePrAiHandler } from "./commands/ai/describe-pr";
 import { invokeAiHandler } from "./commands/ai/invoke";
 import { popCodeHandler } from "./commands/code/pop";
@@ -108,11 +108,14 @@ function main() {
             []
         )
         .option("-d, --delegate", "Clone the current repository and have codex work in a separate workspace")
-        .argument("<message>", "The message to ask codex")
-        .action(async (message: string, options: { prompt: string[]; delegate?: boolean }) => {
-            const args: AskCodexArgs = { message, prompt: options.prompt, delegate: options.delegate ?? false };
-            await askCodex(args);
-        });
+        .argument("[message]", "The message to ask codex")
+        .action((message: string | undefined, options: { prompt: string[]; delegate?: boolean }) =>
+            askCodexAiHandler({
+                request: message,
+                prompts: options.prompt,
+                freshRepo: options.delegate,
+            })
+        );
 
     ai.command("invoke")
         .description("Invoke your AI assistant using a custom script")
