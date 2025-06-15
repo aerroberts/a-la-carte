@@ -1,26 +1,23 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { askClaude, AskClaudeArgs } from "./commands/ai/ask-claude";
-import { askCodex, AskCodexArgs } from "./commands/ai/ask-codex";
-import { invokeAi, InvokeArgs } from "./commands/ai/invoke";
-import { setClaudeKey, SetClaudeKeyArgs } from "./commands/ai/set-claude-key";
-import { setDefaultProvider, SetDefaultProviderArgs } from "./commands/ai/set-default-provider";
-import { setOpenAiKey, SetOpenAiKeyArgs } from "./commands/ai/set-openai-key";
-import { popStash, PopArgs } from "./commands/code/pop";
-import { populateDescriptionAction, PopulateDescriptionArgs } from "./commands/code/populate-description";
-import { rebasePullRequests, RebasePrsArgs } from "./commands/code/rebase-prs";
-import { shoveChanges, ShoveArgs } from "./commands/code/shove";
-import { watchFiles, WatchArgs } from "./commands/code/watch";
-import { addPromptCommand, AddPromptArgs } from "./commands/config/add-prompt";
-import { listPromptsCommand, ListPromptsArgs } from "./commands/config/list-prompts";
-import { openConfigCommand, OpenConfigArgs } from "./commands/config/open";
-import { setSource, SetSourceArgs } from "./commands/config/set-source";
-import { syncConfig, SyncArgs } from "./commands/config/sync";
 
-function collectPrompts(value: string, previous: string[]): string[] {
-    return previous.concat([value]);
-}
+import { type AskClaudeArgs, askClaude } from "./commands/ai/ask-claude";
+import { type AskCodexArgs, askCodex } from "./commands/ai/ask-codex";
+import { type InvokeArgs, invokeAi } from "./commands/ai/invoke";
+import { type SetClaudeKeyArgs, setClaudeKey } from "./commands/ai/set-claude-key";
+import { type SetDefaultProviderArgs, setDefaultProvider } from "./commands/ai/set-default-provider";
+import { type SetOpenAiKeyArgs, setOpenAiKey } from "./commands/ai/set-openai-key";
+import { type PopArgs, popStash } from "./commands/code/pop";
+import { type PopulateDescriptionArgs, populateDescriptionAction } from "./commands/code/populate-description";
+import { type RebasePrsArgs, rebasePullRequests } from "./commands/code/rebase-prs";
+import { shoveCodeHandler } from "./commands/code/shove";
+import { codeWatchHandler } from "./commands/code/watch";
+import { type AddPromptArgs, addPromptCommand } from "./commands/config/add-prompt";
+import { type ListPromptsArgs, listPromptsCommand } from "./commands/config/list-prompts";
+import { type OpenConfigArgs, openConfigCommand } from "./commands/config/open";
+import { type SetSourceArgs, setSource } from "./commands/config/set-source";
+import { type SyncArgs, syncConfig } from "./commands/config/sync";
 
 function main() {
     const program = new Command();
@@ -34,11 +31,8 @@ function main() {
     // code commands
     code.command("shove")
         .description("Force pushes your local changes to the remote repository")
-        .argument("<message>", "The message to commit with")
-        .action(async (message: string) => {
-            const args: ShoveArgs = { message };
-            await shoveChanges(args);
-        });
+        .argument("[message]", "The message to commit with")
+        .action((message?: string) => shoveCodeHandler({ message }));
 
     code.command("pop")
         .description("Pop the latest git stash")
@@ -60,15 +54,13 @@ function main() {
             const args: RebasePrsArgs = {};
             await rebasePullRequests(args);
         });
-
     code.command("watch")
         .description("Watches files matching a pattern and runs a command on change")
-        .argument("<pattern>", "Glob pattern of files to watch")
+        .option("-p, --pattern <pattern>", "Glob pattern of files to watch")
         .argument("<command>", "Command to run on file change")
-        .action(async (pattern: string, commandStr: string) => {
-            const args: WatchArgs = { pattern, command: commandStr };
-            await watchFiles(args);
-        });
+        .action((commandStr: string, options: { pattern: string }) =>
+            codeWatchHandler({ pattern: options.pattern, command: commandStr })
+        );
 
     // config commands
     config
@@ -122,7 +114,7 @@ function main() {
         .option(
             "-p, --prompt <name>",
             "Load a prompt from the config system (can be used multiple times)",
-            collectPrompts,
+            (value: string, previous: string[]) => [...previous, value],
             []
         )
         .option("-d, --delegate", "Clone the current repository and have claude work in a separate workspace")
@@ -139,7 +131,7 @@ function main() {
         .option(
             "-p, --prompt <name>",
             "Load a prompt from the config system (can be used multiple times)",
-            collectPrompts,
+            (value: string, previous: string[]) => [...previous, value],
             []
         )
         .option("-d, --delegate", "Clone the current repository and have codex work in a separate workspace")
@@ -154,7 +146,7 @@ function main() {
         .option(
             "-p, --prompt <name>",
             "Load a prompt from the config system (can be used multiple times)",
-            collectPrompts,
+            (value: string, previous: string[]) => [...previous, value],
             []
         )
         .argument("<message>", "The message to send to your AI assistant")

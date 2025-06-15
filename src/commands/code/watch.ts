@@ -1,36 +1,38 @@
 import chalk from "chalk";
 import chokidar from "chokidar";
 import { bash } from "../../utils/bash";
+import { Log } from "../../utils/logger";
 
 export interface WatchArgs {
-    pattern: string;
+    pattern?: string;
     command: string;
 }
 
-async function watch(pattern: string, command: string): Promise<void> {
-    console.log(
-        chalk.green(
-            `Watching ${chalk.whiteBright(pattern)} for changes. Running '${chalk.whiteBright(
-                command
-            )}' on change with 1s debounce.`
-        )
+export async function codeWatchHandler({ pattern, command }: WatchArgs): Promise<void> {
+    Log.info("Starting file watcher");
+    Log.log(
+        `Watching ${chalk.whiteBright(pattern || "**/*")} for changes. Running '${chalk.whiteBright(
+            command
+        )}' on change with 1s debounce.`
     );
 
-    const watcher = chokidar.watch(pattern, { ignoreInitial: true });
+    const watcher = chokidar.watch(pattern || "**/*", { ignoreInitial: true });
     let timer: NodeJS.Timeout | null = null;
 
     const runCommand = async () => {
         try {
-            console.log(chalk.gray(`> ${command}`));
+            Log.info(`Running ${chalk.whiteBright(command)} . . .`);
             await bash(command);
-            console.log(chalk.green(`Finished: ${chalk.whiteBright(command)}`));
+            Log.success(command);
         } catch (error) {
-            console.log(chalk.red(`Command failed: ${error}`));
+            Log.fail(command);
+            Log.warning(error instanceof Error ? error.message : String(error));
         }
     };
 
     watcher.on("change", () => {
         if (timer) {
+            Log.log(". . .");
             clearTimeout(timer);
         }
         timer = setTimeout(runCommand, 1000);
@@ -38,8 +40,4 @@ async function watch(pattern: string, command: string): Promise<void> {
 
     // Keep the process alive by never resolving the promise
     await new Promise(() => {});
-}
-
-export async function watchFiles(args: WatchArgs): Promise<void> {
-    await watch(args.pattern, args.command);
 }

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "a code watch \"src/**/*.ts\" \"npm run dev\"",
+    "watch": "a code watch -p \"src/**/*.ts\" \"npm run dev\"",
     "dev": "npm run build && npm link && chmod a+x ./dist/index.js",
     "link": "npm link",
     "unlink": "npm unlink -g a-la-carte",

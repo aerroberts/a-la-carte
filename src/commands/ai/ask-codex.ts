@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { bashInNewTerminal } from "../../utils/bash";
+import { bashInNewTerminal } from "../../utils/bash-new-terminal";
 import { cloneFreshRepo } from "../../utils/clone-repo";
 import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
 import { Config } from "../../utils/state";
@@ -36,17 +36,17 @@ async function ask(message: string, promptNames: string[], delegate: boolean): P
 
     if (delegate) {
         const aiRepoDir = await cloneFreshRepo();
-        await bashInNewTerminal(
-            aiRepoDir,
-            `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
-        );
+        await bashInNewTerminal({
+            command: `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`,
+            dir: aiRepoDir,
+        });
         console.log("Codex will work in a new terminal window on a copy of your local repository.");
     } else {
         const currentDir = process.cwd();
-        await bashInNewTerminal(
-            currentDir,
-            `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`
-        );
+        await bashInNewTerminal({
+            command: `export OPENAI_API_KEY="${openAiKey}" && codex --full-auto "${finalMessage}"`,
+            dir: currentDir,
+        });
         console.log("Codex will work in a new terminal window in your current workspace.");
     }
 }

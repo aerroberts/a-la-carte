@@ -3,11 +3,6 @@ import { join } from "node:path";
 import chalk from "chalk";
 import { bash } from "./bash";
 
-/**
- * Clones a repository to a temporary directory.
- * @param repoUrl - The URL of the repository to clone.
- * @returns The path to the cloned repository.
- */
 export async function cloneFreshRepo(): Promise<string> {
     const commitHashRaw = await bash("git rev-parse HEAD");
     const commitHash = commitHashRaw.trim();
