@@ -8,9 +8,8 @@ import { type InvokeArgs, invokeAi } from "./commands/ai/invoke";
 import { type SetClaudeKeyArgs, setClaudeKey } from "./commands/ai/set-claude-key";
 import { type SetDefaultProviderArgs, setDefaultProvider } from "./commands/ai/set-default-provider";
 import { type SetOpenAiKeyArgs, setOpenAiKey } from "./commands/ai/set-openai-key";
-import { type PopArgs, popStash } from "./commands/code/pop";
+import { popCodeHandler } from "./commands/code/pop";
 import { type PopulateDescriptionArgs, populateDescriptionAction } from "./commands/code/populate-description";
-import { type RebasePrsArgs, rebasePullRequests } from "./commands/code/rebase-prs";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { type AddPromptArgs, addPromptCommand } from "./commands/config/add-prompt";
@@ -36,10 +35,8 @@ function main() {
 
     code.command("pop")
         .description("Pop the latest git stash")
-        .action(async () => {
-            const args: PopArgs = {};
-            await popStash(args);
-        });
+        .argument("[message]", "The message to commit with")
+        .action((message?: string) => popCodeHandler({ message }));
 
     code.command("populate-description")
         .description("Automatically populate the package.json description field")
@@ -48,12 +45,6 @@ function main() {
             await populateDescriptionAction(args);
         });
 
-    code.command("rebase-prs")
-        .description("Rebase all open pull requests against the main branch")
-        .action(async () => {
-            const args: RebasePrsArgs = {};
-            await rebasePullRequests(args);
-        });
     code.command("watch")
         .description("Watches files matching a pattern and runs a command on change")
         .option("-p, --pattern <pattern>", "Glob pattern of files to watch")
