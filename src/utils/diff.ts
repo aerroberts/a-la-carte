@@ -15,8 +15,8 @@ export async function logDiffStats() {
     }
 
     Log.log(
-        `Code changes impacted ${chalk.whiteBright(files)} files with +${chalk.green(`${added} added`)} lines and -${chalk.red(
-            `${deleted} deleted`
+        `Code changes impacted ${chalk.whiteBright(files)} files with ${chalk.green(`+${added} added`)} lines and ${chalk.red(
+            `-${deleted} deleted`
         )} lines`
     );
 }
