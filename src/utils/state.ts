@@ -33,9 +33,7 @@ export class ConfigManager {
         const value = config[key] as T;
         if (value === undefined) {
             if (defaultValue === undefined) {
-                throw new Error(
-                    `Key ${key} not found in config and no default value provided, please set it first`
-                );
+                throw new Error(`Key ${key} not found in config and no default value provided, please set it first`);
             }
             return defaultValue;
         }

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { AskClaudeCommand } from "./commands/ai/ask-claude";
 import { AskCodexCommand } from "./commands/ai/ask-codex";
 import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
+import { CodePopCommand } from "./commands/code/pop";
 import { CodeShoveCommand } from "./commands/code/shove";
 import { ConfigAddPromptCommand } from "./commands/config/add-prompt";
 import { ConfigListPromptsCommand } from "./commands/config/list-prompts";
@@ -23,6 +24,7 @@ function main() {
 
     // Register subcommands under "code"
     new CodeShoveCommand().register(code);
+    new CodePopCommand().register(code);
 
     new ConfigSyncCommand().register(config);
     new ConfigSetSourceCommand().register(config);
