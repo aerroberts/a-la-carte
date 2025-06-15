@@ -31,7 +31,7 @@ export class CodeRebasePrsCommand implements CommandRegistration {
 
     private async rebasePrs(): Promise<void> {
         try {
-            console.log(chalk.blue("🔄 Fetching open PRs..."));
+            console.log(chalk.blue("Fetching open PRs..."));
 
             const currentBranch = await bash("git branch --show-current");
             const mainBranch = await this.getMainBranch();
@@ -53,27 +53,27 @@ export class CodeRebasePrsCommand implements CommandRegistration {
             }
 
             if (currentBranch.trim()) {
-                console.log(chalk.blue(`🔄 Switching back to ${currentBranch.trim()}`));
+                console.log(chalk.blue(`Switching back to ${currentBranch.trim()}`));
                 await bash(`git checkout ${currentBranch.trim()}`);
             }
         } catch (error) {
-            console.error(chalk.red(`❌ Error: ${error}`));
+            console.error(chalk.red(`Error: ${error}`));
             process.exit(1);
         }
     }
 
     private async watchMode(): Promise<void> {
-        console.log(chalk.blue("👀 Starting watch mode - checking every minute..."));
+        console.log(chalk.blue("Starting watch mode - checking every minute..."));
         console.log(chalk.gray("Press Ctrl+C to stop"));
 
         while (true) {
             try {
                 await this.rebasePrs();
-                console.log(chalk.gray("⏰ Waiting 60 seconds before next check..."));
+                console.log(chalk.gray("Waiting 60 seconds before next check..."));
                 await this.sleep(60000);
             } catch (error) {
-                console.error(chalk.red(`❌ Error in watch mode: ${error}`));
-                console.log(chalk.gray("⏰ Waiting 60 seconds before retry..."));
+                console.error(chalk.red(`Error in watch mode: ${error}`));
+                console.log(chalk.gray("Waiting 60 seconds before retry..."));
                 await this.sleep(60000);
             }
         }
@@ -94,7 +94,7 @@ export class CodeRebasePrsCommand implements CommandRegistration {
     }
 
     private async rebaseSinglePR(pr: PullRequest, mainBranch: string): Promise<void> {
-        console.log(chalk.blue(`\n🔄 Processing PR #${pr.number}: ${pr.title}`));
+        console.log(chalk.blue(`\nProcessing PR #${pr.number}: ${pr.title}`));
 
         try {
             console.log(chalk.gray(`  Switching to branch ${pr.headRefName}...`));
@@ -107,24 +107,24 @@ export class CodeRebasePrsCommand implements CommandRegistration {
             const mergeResult = await bash(`git merge origin/${mainBranch}`);
 
             if (mergeResult.includes("Already up to date")) {
-                console.log(chalk.green(`  ✅ PR #${pr.number} is already up to date`));
+                console.log(chalk.green(`  PR #${pr.number} is already up to date`));
                 return;
             }
 
             console.log(chalk.gray("  Pushing updated branch..."));
             await bash(`git push origin ${pr.headRefName}`);
 
-            console.log(chalk.green(`  ✅ Successfully rebased PR #${pr.number}`));
+            console.log(chalk.green(`  Successfully rebased PR #${pr.number}`));
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
 
             if (errorMessage.includes("CONFLICT")) {
-                console.log(chalk.yellow(`  ⚠️  PR #${pr.number} has merge conflicts - skipping`));
+                console.log(chalk.yellow(`  PR #${pr.number} has merge conflicts - skipping`));
                 await bash("git merge --abort").catch(() => {});
             } else if (errorMessage.includes("pathspec") && errorMessage.includes("did not match")) {
-                console.log(chalk.yellow(`  ⚠️  Branch ${pr.headRefName} not found locally - skipping`));
+                console.log(chalk.yellow(`  Branch ${pr.headRefName} not found locally - skipping`));
             } else {
-                console.log(chalk.red(`  ❌ Failed to rebase PR #${pr.number}: ${errorMessage}`));
+                console.log(chalk.red(`  Failed to rebase PR #${pr.number}: ${errorMessage}`));
             }
         }
     }
