@@ -5,6 +5,7 @@ import { AskClaudeCommand } from "./commands/ai/ask-claude";
 import { AskCodexCommand } from "./commands/ai/ask-codex";
 import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
 import { CodeShoveCommand } from "./commands/code/shove";
+import { CodeWatchCommand } from "./commands/code/watch";
 import { SteeringAddPromptCommand } from "./commands/steering/add-prompt";
 import { SteeringListPromptsCommand } from "./commands/steering/list-prompts";
 import { SteeringOpenCommand } from "./commands/steering/open";
@@ -23,6 +24,7 @@ function main() {
 
     // Register subcommands under "code"
     new CodeShoveCommand().register(code);
+    new CodeWatchCommand().register(code);
 
     new SteeringSyncCommand().register(steering);
     new SteeringSetSourceCommand().register(steering);
