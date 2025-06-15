@@ -4,15 +4,15 @@ import { Command } from "commander";
 
 import { type AskClaudeArgs, askClaude } from "./commands/ai/ask-claude";
 import { type AskCodexArgs, askCodex } from "./commands/ai/ask-codex";
-import { type InvokeArgs, invokeAi } from "./commands/ai/invoke";
-import { type SetClaudeKeyArgs, setClaudeKey } from "./commands/ai/set-claude-key";
-import { type SetDefaultProviderArgs, setDefaultProvider } from "./commands/ai/set-default-provider";
-import { type SetOpenAiKeyArgs, setOpenAiKey } from "./commands/ai/set-openai-key";
+import { describePrAiHandler } from "./commands/ai/describe-pr";
+import { invokeAiHandler } from "./commands/ai/invoke";
 import { popCodeHandler } from "./commands/code/pop";
-import { type PopulateDescriptionArgs, populateDescriptionAction } from "./commands/code/populate-description";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { listPromptsConfigHandler } from "./commands/config/list-prompts";
+import { setClaudeKeyConfigHandler } from "./commands/config/set-claude-key";
+import { setDefaultProviderConfigHandler } from "./commands/config/set-default-provider";
+import { setOpenAiKeyConfigHandler } from "./commands/config/set-openai-key";
 import { showConfigHandler } from "./commands/config/show";
 
 function main() {
@@ -35,13 +35,6 @@ function main() {
         .argument("[message]", "The message to commit with")
         .action((message?: string) => popCodeHandler({ message }));
 
-    code.command("populate-description")
-        .description("Automatically populate the package.json description field")
-        .action(async () => {
-            const args: PopulateDescriptionArgs = {};
-            await populateDescriptionAction(args);
-        });
-
     code.command("watch")
         .description("Watches files matching a pattern and runs a command on change")
         .option("-p, --pattern <pattern>", "Glob pattern of files to watch")
@@ -61,7 +54,30 @@ function main() {
         .description("Shows info about the current config")
         .action(() => showConfigHandler({}));
 
+    config
+        .command("set-openai-key")
+        .description("Set your OpenAI API key")
+        .argument("<key>", "Your OpenAI API key")
+        .action((key: string) => setOpenAiKeyConfigHandler({ key }));
+
+    config
+        .command("set-claude-key")
+        .description("Set your Claude API key")
+        .argument("<key>", "Your Claude API key")
+        .action((key: string) => setClaudeKeyConfigHandler({ key }));
+
+    config
+        .command("set-default-provider")
+        .description("Set your default AI provider (openai or claude)")
+        .argument("<provider>", "The AI provider to set as default (openai or claude)")
+        .action((provider: string) => setDefaultProviderConfigHandler({ provider }));
+
     // ai commands
+    ai.command("describe-pr")
+        .description("Ask AI to describe a GitHub PR")
+        .argument("<url>", "The URL of the GitHub PR")
+        .action((url: string) => describePrAiHandler({ url }));
+
     ai.command("claude")
         .description(
             "Ask Claude to help with a request. By default, claude will work in the current workspace. Use --delegate to have claude work in a fresh cloned repository."
@@ -104,35 +120,11 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
-        .argument("<message>", "The message to send to your AI assistant")
-        .action(async (message: string, options: { prompt: string[] }) => {
-            const args: InvokeArgs = { message, prompt: options.prompt };
-            await invokeAi(args);
-        });
-
-    ai.command("set-openai-key")
-        .description("Set your OpenAI API key")
-        .argument("<key>", "Your OpenAI API key")
-        .action(async (key: string) => {
-            const args: SetOpenAiKeyArgs = { key };
-            await setOpenAiKey(args);
-        });
-
-    ai.command("set-claude-key")
-        .description("Set your Claude API key")
-        .argument("<key>", "Your Claude API key")
-        .action(async (key: string) => {
-            const args: SetClaudeKeyArgs = { key };
-            await setClaudeKey(args);
-        });
-
-    ai.command("set-default-provider")
-        .description("Set your default AI provider (openai or claude)")
-        .argument("<provider>", "The AI provider to set as default (openai or claude)")
-        .action(async (provider: string) => {
-            const args: SetDefaultProviderArgs = { provider };
-            await setDefaultProvider(args);
-        });
+        .argument("<input>", "Path to the input file containing the message")
+        .argument("<output>", "Path where the AI response will be written")
+        .action((input: string, output: string, options: { prompt: string[] }) =>
+            invokeAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
+        );
 
     program.parse();
 }
