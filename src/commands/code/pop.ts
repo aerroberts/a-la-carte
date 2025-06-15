@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { bash } from "../../utils/bash";
 import { logDiffStats } from "../../utils/diff";
 import { Log } from "../../utils/logger";
+import { describePrAiHandler } from "../ai/describe-pr";
 
 export interface PopArgs {
     message?: string;
@@ -33,4 +34,9 @@ export async function popCodeHandler(args: PopArgs): Promise<void> {
     Log.log("Switched back to previous branch without changes");
 
     Log.success(`Popped your local changes off into a Pull Request: ${chalk.whiteBright(prUrl)}`);
+
+    // Then we can automatically describe the PR if we have the url
+    if (prUrl) {
+        await describePrAiHandler({ url: prUrl });
+    }
 }

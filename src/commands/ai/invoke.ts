@@ -1,46 +1,86 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFile, writeFile } from "node:fs/promises";
+import Anthropic from "@anthropic-ai/sdk";
 import chalk from "chalk";
-import { bash } from "../../utils/bash";
-import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
+import { OpenAI } from "openai";
+import { Log } from "../../utils/logger";
+import { combinePromptsWithMessage, loadPrompts, parseResponse } from "../../utils/prompts";
+import { Config } from "../../utils/state";
 
 export interface InvokeArgs {
-    message: string;
-    prompt: string[];
+    inputFilePath: string;
+    outputFilePath: string;
+    prompts?: string[];
 }
 
-function collectPrompts(value: string, previous: string[]): string[] {
-    return previous.concat([value]);
-}
+export async function invokeAiHandler(args: InvokeArgs): Promise<void> {
+    const prompts = loadPrompts(args.prompts || []);
+    const defaultProvider = Config.loadKey<string>("default-provider");
+    const inputFile = await readFile(args.inputFilePath, "utf-8");
+    const finalMessage = combinePromptsWithMessage(prompts, inputFile);
+    const finalMessageTmp = Config.writeToTmp(finalMessage, ".md");
 
-async function invoke(message: string, promptNames: string[]): Promise<void> {
-    // Load prompts if any were specified
-    const prompts = loadPrompts(promptNames);
-    const finalMessage = combinePromptsWithMessage(prompts, message);
-
+    Log.log(`Using ${chalk.whiteBright(defaultProvider)} as default provider`);
     if (prompts.length > 0) {
-        console.log(chalk.green(`Using ${prompts.length} prompt(s) with your request`));
+        Log.log(
+            `Using ${chalk.whiteBright(prompts.length)} prompt(s) with your request: ${chalk.whiteBright(args.prompts?.join(", ") || "")}`
+        );
+    }
+    Log.log(`Context being sent to AI: ${finalMessageTmp}`);
+
+    if (defaultProvider === "claude") {
+        await invokeClaude(finalMessage, args.outputFilePath);
+    } else if (defaultProvider === "openai") {
+        await invokeOpenAi(finalMessage, args.outputFilePath);
     }
 
-    const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-    const invokeFile = join(homeDir, ".a-la-carte", "invoke.sh");
+    // Format the response if it's not already formatted
+    const response = await readFile(args.outputFilePath, "utf-8");
+    const formattedResponse = parseResponse(response);
+    await writeFile(args.outputFilePath, formattedResponse);
 
-    if (!existsSync(invokeFile)) {
-        console.log(chalk.red(`Error: invoke.sh file not found at ${invokeFile}`));
-        console.log(chalk.yellow("Please create this file and make it executable."));
-        console.log(chalk.yellow("It should contain the command to invoke your AI assistant."));
-        return;
-    }
+    Log.log(`Output written to ${args.outputFilePath}`);
+}
 
-    try {
-        await bash(`bash "${invokeFile}" "${finalMessage}"`);
-    } catch (error) {
-        console.log(chalk.red("Error executing invoke.sh:"));
-        console.log(error);
+async function invokeClaude(prompt: string, outputFilePath: string): Promise<void> {
+    const client = new Anthropic({
+        apiKey: Config.loadKey<string>("claude-api-key"),
+    });
+
+    const response = await client.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [
+            {
+                role: "user",
+                content: prompt,
+            },
+        ],
+    });
+
+    Log.log(`Claude responsed with ${response.usage?.output_tokens} tokens`);
+
+    if (response.content[0].type === "text") {
+        await writeFile(outputFilePath, response.content[0].text);
+    } else {
+        Log.error("Error: Response content is not text");
     }
 }
 
-export async function invokeAi(args: InvokeArgs): Promise<void> {
-    const { message, prompt } = args;
-    await invoke(message, prompt);
+async function invokeOpenAi(prompt: string, outputFilePath: string): Promise<void> {
+    const openai = new OpenAI({
+        apiKey: Config.loadKey<string>("openai-api-key"),
+    });
+
+    const response = await openai.chat.completions.create({
+        model: "gpt-4.1-2025-04-14",
+        messages: [{ role: "user", content: prompt }],
+    });
+
+    Log.log(`OpenAI responsed with ${response.usage?.completion_tokens} tokens`);
+
+    if (response.choices[0].message.content) {
+        await writeFile(outputFilePath, response.choices[0].message.content);
+    } else {
+        Log.error("Error: Response content is not text");
+    }
 }
