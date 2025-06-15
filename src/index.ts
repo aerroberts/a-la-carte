@@ -3,6 +3,9 @@
 import { Command } from "commander";
 import { AskClaudeCommand } from "./commands/ai/ask-claude";
 import { AskCodexCommand } from "./commands/ai/ask-codex";
+import { AiInvokeCommand } from "./commands/ai/invoke";
+import { AiSetClaudeKeyCommand } from "./commands/ai/set-claude-key";
+import { AiSetDefaultProviderCommand } from "./commands/ai/set-default-provider";
 import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
 import { CodePopCommand } from "./commands/code/pop";
 import { CodeRebasePrsCommand } from "./commands/code/rebase-prs";
@@ -41,6 +44,9 @@ function main() {
     new AskClaudeCommand().register(ai);
     new AskCodexCommand().register(ai);
     new AiSetOpenAiKeyCommand().register(ai);
+    new AiSetClaudeKeyCommand().register(ai);
+    new AiSetDefaultProviderCommand().register(ai);
+    new AiInvokeCommand().register(ai);
 
     program.parse();
 }
