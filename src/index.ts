@@ -6,6 +6,7 @@ import { AskCodexCommand } from "./commands/ai/ask-codex";
 import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
 import { CodeRebasePrsCommand } from "./commands/code/rebase-prs";
 import { CodeShoveCommand } from "./commands/code/shove";
+import { CodeWatchCommand } from "./commands/code/watch";
 import { ConfigAddPromptCommand } from "./commands/config/add-prompt";
 import { ConfigListPromptsCommand } from "./commands/config/list-prompts";
 import { ConfigOpenCommand } from "./commands/config/open";
@@ -25,6 +26,7 @@ function main() {
     // Register subcommands under "code"
     new CodeShoveCommand().register(code);
     new CodeRebasePrsCommand().register(code);
+    new CodeWatchCommand().register(code);
 
     new ConfigSyncCommand().register(config);
     new ConfigSetSourceCommand().register(config);
