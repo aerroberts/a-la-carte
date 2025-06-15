@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import chalk from "chalk";
 import { Log } from "./logger";
 
 export function loadPrompts(promptNames: string[]): string[] {

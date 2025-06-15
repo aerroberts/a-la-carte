@@ -1,6 +1,6 @@
-import { readdirSync, writeFileSync, readFileSync, mkdirSync } from "node:fs";
-import { join, extname } from "node:path";
 import { execSync } from "node:child_process";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { extname, join } from "node:path";
 import chalk from "chalk";
 import { Log } from "../../utils/logger";
 
@@ -50,10 +50,10 @@ export async function syncRulesConfigHandler(_: SyncRulesArgs): Promise<void> {
             try {
                 const sourcePath = join(sourceDir, file);
                 const targetPath = join(targetDir, file);
-                
+
                 const content = readFileSync(sourcePath, "utf-8");
                 writeFileSync(targetPath, content, "utf-8");
-                
+
                 Log.log(`✓ Copied ${chalk.green(file)}`);
                 copiedCount++;
             } catch (error) {
@@ -61,8 +61,9 @@ export async function syncRulesConfigHandler(_: SyncRulesArgs): Promise<void> {
             }
         }
 
-        Log.info(`Successfully synced ${chalk.green(copiedCount.toString())} rule files to ${chalk.whiteBright(targetDir)}`);
-        
+        Log.info(
+            `Successfully synced ${chalk.green(copiedCount.toString())} rule files to ${chalk.whiteBright(targetDir)}`
+        );
     } catch (error) {
         Log.error(`Failed to sync rules: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
