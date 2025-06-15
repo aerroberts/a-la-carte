@@ -16,6 +16,9 @@
                 "useNumberNamespace": "error",
                 "noInferrableTypes": "error",
                 "noUselessElse": "error"
+            },
+            "suspicious": {
+                "noEmptyInterface": "off"
             }
         }
     },
@@ -33,12 +36,6 @@
         }
     },
     "files": {
-        "includes": [
-            "**/src/**/*",
-            "**/scripts/**/*",
-            "!**/node_modules/**",
-            "!**/dist/**",
-            "!**/*.config.js"
-        ]
+        "includes": ["**/src/**/*", "**/scripts/**/*", "!**/node_modules/**", "!**/dist/**", "!**/*.config.js"]
     }
 }

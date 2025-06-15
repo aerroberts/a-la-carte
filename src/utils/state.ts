@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { Log } from "./logger";
 
 export class ConfigManager {
     private configPath: string;
@@ -12,6 +13,14 @@ export class ConfigManager {
         const dir = dirname(this.configPath);
         if (!existsSync(dir)) {
             mkdirSync(dir, { recursive: true });
+        }
+    }
+
+    private ensureTmpDir(): void {
+        const dir = dirname(this.configPath);
+        const tmpDir = join(dir, "tmp");
+        if (!existsSync(tmpDir)) {
+            mkdirSync(tmpDir, { recursive: true });
         }
     }
 
@@ -33,7 +42,8 @@ export class ConfigManager {
         const value = config[key] as T;
         if (value === undefined) {
             if (defaultValue === undefined) {
-                throw new Error(`Key ${key} not found in config and no default value provided, please set it first`);
+                Log.error(`Key ${key} not found in config and no default value provided, please set it first`);
+                process.exit(1);
             }
             return defaultValue;
         }
@@ -45,6 +55,25 @@ export class ConfigManager {
         config[key] = value;
         this.ensureConfigDir();
         writeFileSync(this.configPath, JSON.stringify(config, null, 2));
+    }
+
+    getConfigPath(): string {
+        return this.configPath;
+    }
+
+    loadFullConfig(): Record<string, unknown> {
+        const config = this.getConfig();
+        const fullConfig = { ...config };
+        return fullConfig;
+    }
+
+    writeToTmp(content: string, extension?: string): string {
+        this.ensureTmpDir();
+        const randomId = Math.random().toString(36).substring(2, 15);
+        const dir = dirname(this.configPath);
+        const tmpPath = join(dir, "tmp", randomId + (extension || ".txt"));
+        writeFileSync(tmpPath, content);
+        return tmpPath;
     }
 }
 
