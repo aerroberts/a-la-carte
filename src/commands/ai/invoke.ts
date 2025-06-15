@@ -1,10 +1,13 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
 import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
+
+export interface InvokeArgs {
+    message: string;
+    prompt: string[];
+}
 
 function collectPrompts(value: string, previous: string[]): string[] {
     return previous.concat([value]);
@@ -37,18 +40,7 @@ async function invoke(message: string, promptNames: string[]): Promise<void> {
     }
 }
 
-export const registerInvokeCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("invoke")
-        .description("Invoke your AI assistant using a custom script")
-        .option(
-            "-p, --prompt <name>",
-            "Load a prompt from the config system (can be used multiple times)",
-            collectPrompts,
-            []
-        )
-        .argument("<message>", "The message to send to your AI assistant")
-        .action(async (message: string, options: { prompt: string[] }) => {
-            await invoke(message, options.prompt);
-        });
-};
+export async function invokeAi(args: InvokeArgs): Promise<void> {
+    const { message, prompt } = args;
+    await invoke(message, prompt);
+}

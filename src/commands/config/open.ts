@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
+
+export interface OpenConfigArgs {}
 
 async function openConfig(): Promise<void> {
     const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
@@ -34,11 +34,6 @@ async function openConfig(): Promise<void> {
     }
 }
 
-export const registerOpenCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("open")
-        .description("Open the configuration file in your default editor")
-        .action(async () => {
-            await openConfig();
-        });
-};
+export async function openConfigCommand(_: OpenConfigArgs): Promise<void> {
+    await openConfig();
+}

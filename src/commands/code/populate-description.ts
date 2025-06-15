@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
+
+export interface PopulateDescriptionArgs {}
 
 async function populateDescription(): Promise<void> {
     try {
@@ -34,11 +34,6 @@ async function populateDescription(): Promise<void> {
     }
 }
 
-export const registerPopulateDescriptionCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("populate-description")
-        .description("Automatically populate the package.json description field")
-        .action(async () => {
-            await populateDescription();
-        });
-};
+export async function populateDescriptionAction(_: PopulateDescriptionArgs): Promise<void> {
+    await populateDescription();
+}

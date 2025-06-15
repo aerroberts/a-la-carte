@@ -1,8 +1,8 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
+
+export interface ListPromptsArgs {}
 
 function listPrompts(): void {
     const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
@@ -30,11 +30,6 @@ function listPrompts(): void {
     }
 }
 
-export const registerListPromptsCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("list-prompts")
-        .description("List all available prompts")
-        .action(() => {
-            listPrompts();
-        });
-};
+export async function listPromptsCommand(_: ListPromptsArgs): Promise<void> {
+    listPrompts();
+}
