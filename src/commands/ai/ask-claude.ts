@@ -1,57 +1,55 @@
-import chalk from "chalk";
+import { spawn } from "node:child_process";
 import { bashInNewTerminal } from "../../utils/bash-new-terminal";
 import { cloneFreshRepo } from "../../utils/clone-repo";
+import { Log } from "../../utils/logger";
 import { combinePromptsWithMessage, loadPrompts } from "../../utils/prompts";
-import { Config } from "../../utils/state";
 
-export interface AskClaudeArgs {
-    message: string;
-    prompt: string[];
-    delegate: boolean;
+export interface AskClaudeAIArgs {
+    request?: string;
+    prompts?: string[];
+    freshRepo?: boolean;
 }
 
-async function getClaudeKey(): Promise<string> {
-    let claudeKey: string;
-    try {
-        claudeKey = Config.loadKey<string>("claude-api-key");
-    } catch {
-        console.log(chalk.red("Error: Claude API key not configured."));
-        console.log(chalk.yellow("Please set your Claude API key first using:"));
-        console.log(chalk.whiteBright("  a ai set-claude-key <your-api-key>"));
-        process.exit(1);
-    }
-    return claudeKey;
-}
+export async function askClaudeAiHander(args: AskClaudeAIArgs): Promise<void> {
+    Log.info("Asking Claude Code CLI for help");
 
-async function ask(message: string, promptNames: string[], delegate: boolean): Promise<void> {
-    // Load prompts if any were specified
-    const prompts = loadPrompts(promptNames);
-    const finalMessage = combinePromptsWithMessage(prompts, message);
+    const prompts = loadPrompts(args.prompts || []);
+    const finalMessage = combinePromptsWithMessage(prompts, args.request || "");
 
     if (prompts.length > 0) {
-        console.log(chalk.green(`Using ${prompts.length} prompt(s) with your request`));
+        Log.log(`Using ${prompts.length} prompt(s) with your request`);
     }
 
-    const claudeKey = await getClaudeKey();
+    let repoDir = process.cwd();
 
-    if (delegate) {
-        const aiRepoDir = await cloneFreshRepo();
+    if (args.freshRepo) {
+        Log.log("Cloning fresh repository for Claude to work in");
+        repoDir = await cloneFreshRepo();
+    }
+
+    if (args.freshRepo) {
         await bashInNewTerminal({
-            command: `export ANTHROPIC_API_KEY="${claudeKey}" && claude --full-auto "${finalMessage}"`,
-            dir: aiRepoDir,
+            command: `claude --dangerously-skip-permissions "${finalMessage}"`,
+            dir: repoDir,
         });
-        console.log("Claude will work in a new terminal window on a copy of your local repository.");
+        Log.log(`Claude will work in a new terminal window in ${repoDir}`);
     } else {
-        const currentDir = process.cwd();
-        await bashInNewTerminal({
-            command: `export ANTHROPIC_API_KEY="${claudeKey}" && claude --full-auto "${finalMessage}"`,
-            dir: currentDir,
+        // Hand over terminal control to Claude CLI for full interactivity
+        const claude = spawn("claude", ["--dangerously-skip-permissions", finalMessage], {
+            env: {
+                ...process.env,
+            },
+            cwd: repoDir,
+            stdio: "inherit",
         });
-        console.log("Claude will work in a new terminal window in your current workspace.");
-    }
-}
 
-export async function askClaude(args: AskClaudeArgs): Promise<void> {
-    const { message, prompt, delegate } = args;
-    await ask(message, prompt, delegate);
+        claude.on("close", (code) => {
+            process.exit(code || 0);
+        });
+
+        claude.on("error", (error) => {
+            Log.error(`Failed to start Claude: ${error.message}`);
+            process.exit(1);
+        });
+    }
 }

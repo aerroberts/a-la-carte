@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-
-import { type AskClaudeArgs, askClaude } from "./commands/ai/ask-claude";
+import { askClaudeAiHander } from "./commands/ai/ask-claude";
 import { type AskCodexArgs, askCodex } from "./commands/ai/ask-codex";
 import { describePrAiHandler } from "./commands/ai/describe-pr";
 import { invokeAiHandler } from "./commands/ai/invoke";
@@ -89,11 +88,14 @@ function main() {
             []
         )
         .option("-d, --delegate", "Clone the current repository and have claude work in a separate workspace")
-        .argument("<message>", "The message to ask claude")
-        .action(async (message: string, options: { prompt: string[]; delegate?: boolean }) => {
-            const args: AskClaudeArgs = { message, prompt: options.prompt, delegate: options.delegate ?? false };
-            await askClaude(args);
-        });
+        .argument("[message]", "The message to ask claude")
+        .action((message: string | undefined, options: { prompt: string[]; delegate?: boolean }) =>
+            askClaudeAiHander({
+                request: message,
+                prompts: options.prompt,
+                freshRepo: options.delegate,
+            })
+        );
 
     ai.command("codex")
         .description(
