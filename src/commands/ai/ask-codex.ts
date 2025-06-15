@@ -17,7 +17,7 @@ export class AskCodexCommand implements CommandRegistration {
             .description(this.description)
             .option(
                 "-p, --prompt <name>",
-                "Load a prompt from the steering system (can be used multiple times)",
+                "Load a prompt from the config system (can be used multiple times)",
                 this.collectPrompts,
                 []
             )

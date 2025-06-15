@@ -14,7 +14,7 @@ export function loadPrompts(promptNames: string[]): string[] {
 
         if (!existsSync(filePath)) {
             console.log(chalk.yellow(`Warning: Prompt "${promptName}" not found at ${filePath}`));
-            console.log(chalk.gray("Use 'a steering list-prompts' to see available prompts"));
+            console.log(chalk.gray("Use 'a config list-prompts' to see available prompts"));
             continue;
         }
 

@@ -4,7 +4,7 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import type { CommandRegistration } from "../../types";
 
-export class SteeringListPromptsCommand implements CommandRegistration {
+export class ConfigListPromptsCommand implements CommandRegistration {
     name = "list-prompts";
     description = "Lists all available prompts";
 
@@ -23,7 +23,7 @@ export class SteeringListPromptsCommand implements CommandRegistration {
 
         if (!existsSync(promptsDir)) {
             console.log(
-                chalk.yellow("No prompts directory found. Use 'a steering add-prompt' to create your first prompt.")
+                chalk.yellow("No prompts directory found. Use 'a config add-prompt' to create your first prompt.")
             );
             return;
         }
@@ -32,7 +32,7 @@ export class SteeringListPromptsCommand implements CommandRegistration {
         const markdownFiles = files.filter((file) => file.endsWith(".md"));
 
         if (markdownFiles.length === 0) {
-            console.log(chalk.yellow("No prompts found. Use 'a steering add-prompt' to create your first prompt."));
+            console.log(chalk.yellow("No prompts found. Use 'a config add-prompt' to create your first prompt."));
             return;
         }
 

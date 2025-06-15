@@ -4,7 +4,7 @@ import chalk from "chalk";
 import type { Command } from "commander";
 import type { CommandRegistration } from "../../types";
 
-export class SteeringAddPromptCommand implements CommandRegistration {
+export class ConfigAddPromptCommand implements CommandRegistration {
     name = "add-prompt";
     description = "Adds a new prompt with the specified name and content";
 

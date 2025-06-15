@@ -5,9 +5,9 @@ import type { Command } from "commander";
 import type { CommandRegistration } from "../../types";
 import { bash } from "../../utils/bash";
 
-export class SteeringOpenCommand implements CommandRegistration {
+export class ConfigOpenCommand implements CommandRegistration {
     name = "open";
-    description = "Opens the steering metadata directory (prompts) in the file system";
+    description = "Opens the config metadata directory (prompts) in the file system";
 
     register(program: Command): void {
         program
@@ -30,6 +30,6 @@ export class SteeringOpenCommand implements CommandRegistration {
 
         // Open the directory in the default file manager
         await bash(`open "${promptsDir}"`);
-        console.log(chalk.green(`Opened steering metadata directory: ${chalk.whiteBright(promptsDir)}`));
+        console.log(chalk.green(`Opened config metadata directory: ${chalk.whiteBright(promptsDir)}`));
     }
 }

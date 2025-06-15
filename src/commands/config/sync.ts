@@ -7,42 +7,44 @@ import { bash } from "../../utils/bash";
 import { extractContentFromPath } from "../../utils/files";
 import { Config } from "../../utils/state";
 
-interface SteeringSyncResult {
+interface ConfigSyncResult {
     cursorRules: Record<string, string>;
     prompts: Record<string, string>;
+    githubWorkflows: Record<string, string>;
 }
 
-export class SteeringSyncCommand implements CommandRegistration {
+export class ConfigSyncCommand implements CommandRegistration {
     name = "sync";
-    description = "Syncs the steering rules and prompts from the configured source into the current environment";
+    description = "Syncs the config rules and prompts from the configured source into the current environment";
 
     register(program: Command): void {
         program
             .command(this.name)
             .description(this.description)
             .action(async () => {
-                await this.syncSteering();
+                await this.syncConfig();
             });
     }
 
-    private async syncSteering(): Promise<void> {
-        const src = Config.loadKey("steering-src");
-        console.log(chalk.green(`Syncing steering from ${chalk.whiteBright(src)} . . .`));
+    private async syncConfig(): Promise<void> {
+        const src = Config.loadKey("config-src", "");
+        console.log(chalk.green(`Syncing config from ${chalk.whiteBright(src)} . . .`));
 
         if (!src) {
-            console.log(chalk.red("No steering source configured. Please set a steering source using:"));
-            console.log(chalk.whiteBright("  a steering set-source <url>"));
+            console.log(chalk.red("No config source configured. Please set a config source using:"));
+            console.log(chalk.whiteBright("  a config set-source <url>"));
             process.exit(1);
         }
 
-        const { cursorRules, prompts } = await this.extractRepoMetadata(src as string);
+        const { cursorRules, prompts, githubWorkflows } = await this.extractRepoMetadata(src as string);
         await this.setupCursorRules(cursorRules);
         await this.setupPrompts(prompts);
+        await this.setupGithubWorkflows(githubWorkflows);
     }
 
-    private async extractRepoMetadata(src: string): Promise<SteeringSyncResult> {
+    private async extractRepoMetadata(src: string): Promise<ConfigSyncResult> {
         const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
-        const tempDir = join(homeDir, ".a-la-carte", "tmp", "steering");
+        const tempDir = join(homeDir, ".a-la-carte", "tmp", "config");
         if (existsSync(tempDir)) {
             await bash(`rm -rf ${tempDir}`);
         }
@@ -51,8 +53,9 @@ export class SteeringSyncCommand implements CommandRegistration {
 
         const cursorRules = extractContentFromPath(join(tempDir, "cursor-rules"));
         const prompts = extractContentFromPath(join(tempDir, "prompts"));
+        const githubWorkflows = extractContentFromPath(join(tempDir, ".github", "workflows"));
 
-        return { cursorRules, prompts };
+        return { cursorRules, prompts, githubWorkflows };
     }
 
     private async setupCursorRules(cursorRules: Record<string, string>): Promise<void> {
@@ -82,5 +85,19 @@ export class SteeringSyncCommand implements CommandRegistration {
             console.log(chalk.gray(`- synced prompt: ${chalk.whiteBright(fileName)}`));
         }
         console.log(chalk.green("Successfully synced all prompts!"));
+    }
+
+    private async setupGithubWorkflows(githubWorkflows: Record<string, string>): Promise<void> {
+        const githubWorkflowsDir = join(process.cwd(), ".github", "workflows");
+        if (!existsSync(githubWorkflowsDir)) {
+            mkdirSync(githubWorkflowsDir, { recursive: true });
+        }
+
+        for (const [fileName, content] of Object.entries(githubWorkflows)) {
+            const targetPath = join(githubWorkflowsDir, fileName);
+            writeFileSync(targetPath, content);
+            console.log(chalk.gray(`- synced github workflow: ${chalk.whiteBright(fileName)}`));
+        }
+        console.log(chalk.green("Successfully synced all github workflows!"));
     }
 }
