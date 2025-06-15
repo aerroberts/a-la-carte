@@ -13,6 +13,7 @@ import { setClaudeKeyConfigHandler } from "./commands/config/set-claude-key";
 import { setDefaultProviderConfigHandler } from "./commands/config/set-default-provider";
 import { setOpenAiKeyConfigHandler } from "./commands/config/set-openai-key";
 import { showConfigHandler } from "./commands/config/show";
+import { syncRulesConfigHandler } from "./commands/config/sync-rules";
 
 function main() {
     const program = new Command();
@@ -70,6 +71,11 @@ function main() {
         .description("Set your default AI provider (openai or claude)")
         .argument("<provider>", "The AI provider to set as default (openai or claude)")
         .action((provider: string) => setDefaultProviderConfigHandler({ provider }));
+
+    config
+        .command("sync-rules")
+        .description("Sync all rules from prompts/rules folder to .cursor/rules in git workspace root")
+        .action(() => syncRulesConfigHandler({}));
 
     // ai commands
     ai.command("describe-pr")
