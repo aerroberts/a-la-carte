@@ -1,7 +1,12 @@
 import { exec } from "node:child_process";
 import { Log } from "./logger";
 
-export async function bash(command: string): Promise<string> {
+interface BashOptions {
+    dir?: string;
+    logOutput?: boolean;
+}
+
+export async function bash(command: string, options: BashOptions = {}): Promise<string> {
     return new Promise((resolve, reject) => {
         exec(command, (error: Error | null, stdout: string, stderr: string) => {
             if (error) {
@@ -11,17 +16,19 @@ export async function bash(command: string): Promise<string> {
                 reject(error);
                 return;
             }
-            if (stdout || stderr) {
-                Log.log("--------------------------------");
-            }
-            if (stdout) {
-                Log.log(stdout.replaceAll("\n", "\n    "));
-            }
-            if (stderr) {
-                Log.log(stderr.replaceAll("\n", "\n    "));
-            }
-            if (stdout || stderr) {
-                Log.log("--------------------------------");
+            if (options.logOutput) {
+                if (stdout || stderr) {
+                    Log.log("--------------------------------");
+                }
+                if (stdout) {
+                    Log.log(stdout.replaceAll("\n", "\n    "));
+                }
+                if (stderr) {
+                    Log.log(stderr.replaceAll("\n", "\n    "));
+                }
+                if (stdout || stderr) {
+                    Log.log("--------------------------------");
+                }
             }
             resolve(stdout + stderr);
         });
