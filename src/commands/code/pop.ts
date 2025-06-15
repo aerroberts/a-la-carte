@@ -39,6 +39,7 @@ export class CodePopCommand implements CommandRegistration {
         try {
             console.log(chalk.green(`Creating PR with title ${chalk.whiteBright(message)} against main`));
             await bash(`gh pr create --title \"${message}\" --body "" --head ${branch} --base main`);
+            await bash(`gh pr merge ${branch} --auto --merge`);
 
             console.log(
                 chalk.green(

@@ -30,12 +30,14 @@ function main() {
     new CodeRebasePrsCommand().register(code);
     new CodeWatchCommand().register(code);
 
+    // Register subcommands under "config"
     new ConfigSyncCommand().register(config);
     new ConfigSetSourceCommand().register(config);
     new ConfigAddPromptCommand().register(config);
     new ConfigListPromptsCommand().register(config);
     new ConfigOpenCommand().register(config);
 
+    // Register subcommands under "ai"
     new AskClaudeCommand().register(ai);
     new AskCodexCommand().register(ai);
     new AiSetOpenAiKeyCommand().register(ai);

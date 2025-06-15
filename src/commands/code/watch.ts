@@ -48,9 +48,7 @@ export class CodeWatchCommand implements CommandRegistration {
             timer = setTimeout(runCommand, 1000);
         });
 
-        // Keep the process alive
-        await new Promise(() => {
-            /* never resolve */
-        });
+        // Keep the process alive by never resolving the promise
+        await new Promise(() => {});
     }
 }
