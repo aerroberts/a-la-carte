@@ -1,7 +1,9 @@
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
+
+export interface ShoveArgs {
+    message: string;
+}
 
 async function shove(message: string): Promise<void> {
     await bash("git add -A");
@@ -25,12 +27,6 @@ async function shove(message: string): Promise<void> {
     console.log(log);
 }
 
-export const registerShoveCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("shove")
-        .description("Force pushes your local changes to the remote repository")
-        .argument("<message>", "The message to commit with")
-        .action(async (message: string) => {
-            await shove(message);
-        });
-};
+export async function shoveChanges(args: ShoveArgs): Promise<void> {
+    await shove(args.message);
+}

@@ -1,8 +1,11 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
+
+export interface AddPromptArgs {
+    name: string;
+    content: string;
+}
 
 async function addPrompt(name: string, content: string): Promise<void> {
     const homeDir = process.env.HOME || process.env.USERPROFILE || "/";
@@ -40,13 +43,6 @@ async function addPrompt(name: string, content: string): Promise<void> {
     console.log(chalk.gray(`File saved to: ${filePath}`));
 }
 
-export const registerAddPromptCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("add-prompt")
-        .description("Adds a new prompt with the specified name and content")
-        .argument("<name>", "The name of the prompt")
-        .argument("<content>", "The content/text of the prompt")
-        .action(async (name: string, content: string) => {
-            await addPrompt(name, content);
-        });
-};
+export async function addPromptCommand(args: AddPromptArgs): Promise<void> {
+    await addPrompt(args.name, args.content);
+}

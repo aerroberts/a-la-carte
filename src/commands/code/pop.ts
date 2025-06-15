@@ -1,7 +1,7 @@
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
+
+export interface PopArgs {}
 
 async function pop(): Promise<void> {
     try {
@@ -21,11 +21,6 @@ async function pop(): Promise<void> {
     }
 }
 
-export const registerPopCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("pop")
-        .description("Pop the latest git stash")
-        .action(async () => {
-            await pop();
-        });
-};
+export async function popStash(_: PopArgs): Promise<void> {
+    await pop();
+}

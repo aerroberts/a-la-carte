@@ -2,9 +2,9 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { Config } from "../../utils/state";
+
+export interface SyncArgs {}
 
 async function sync(): Promise<void> {
     try {
@@ -42,11 +42,6 @@ async function sync(): Promise<void> {
     }
 }
 
-export const registerSyncCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("sync")
-        .description("Sync configuration from a remote git repository")
-        .action(async () => {
-            await sync();
-        });
-};
+export async function syncConfig(_: SyncArgs): Promise<void> {
+    await sync();
+}

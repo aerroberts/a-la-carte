@@ -1,7 +1,7 @@
 import chalk from "chalk";
-import type { Command } from "commander";
-import type { CommandRegistrator } from "../../types";
 import { bash } from "../../utils/bash";
+
+export interface RebasePrsArgs {}
 
 async function rebasePrs(): Promise<void> {
     try {
@@ -50,11 +50,6 @@ async function rebasePrs(): Promise<void> {
     }
 }
 
-export const registerRebasePrsCommand: CommandRegistrator = (program: Command): void => {
-    program
-        .command("rebase-prs")
-        .description("Rebase all open pull requests against the main branch")
-        .action(async () => {
-            await rebasePrs();
-        });
-};
+export async function rebasePullRequests(_: RebasePrsArgs): Promise<void> {
+    await rebasePrs();
+}
