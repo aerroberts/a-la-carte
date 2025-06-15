@@ -1,6 +1,6 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import chalk from "chalk";
-import { existsSync } from "fs";
-import { join } from "path";
 import { bash } from "./bash";
 
 /**
