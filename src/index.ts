@@ -8,6 +8,7 @@ import { AiSetClaudeKeyCommand } from "./commands/ai/set-claude-key";
 import { AiSetDefaultProviderCommand } from "./commands/ai/set-default-provider";
 import { AiSetOpenAiKeyCommand } from "./commands/ai/set-openai-key";
 import { CodePopCommand } from "./commands/code/pop";
+import { CodePopulateDescriptionCommand } from "./commands/code/populate-description";
 import { CodeRebasePrsCommand } from "./commands/code/rebase-prs";
 import { CodeShoveCommand } from "./commands/code/shove";
 import { CodeWatchCommand } from "./commands/code/watch";
@@ -30,6 +31,7 @@ function main() {
     // Register subcommands under "code"
     new CodeShoveCommand().register(code);
     new CodePopCommand().register(code);
+    new CodePopulateDescriptionCommand().register(code);
     new CodeRebasePrsCommand().register(code);
     new CodeWatchCommand().register(code);
 
