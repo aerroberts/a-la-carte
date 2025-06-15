@@ -22,17 +22,34 @@ export class CodePopCommand implements CommandRegistration {
         const hash = Math.random().toString(36).substring(2, 8);
         const branch = `@${user}/${hash}`;
 
+        console.log(chalk.green(`Creating branch ${chalk.whiteBright(branch)} with your current changes.`));
+
         await bash(`git checkout -b ${branch}`);
         await bash("git add -A");
+
+        console.log(
+            chalk.green(
+                `Committing changes to branch ${chalk.whiteBright(branch)} with message: ${chalk.whiteBright(message)}`
+            )
+        );
+
         await bash(`git commit -m \"${message}\"`);
         await bash(`git push -u origin ${branch}`);
 
         try {
+            console.log(chalk.green(`Creating PR with title ${chalk.whiteBright(message)} against main`));
             await bash(`gh pr create --title \"${message}\" --body "" --head ${branch} --base main`);
+
+            console.log(
+                chalk.green(
+                    `You can now view your PR at ${chalk.whiteBright(`https://github.com/${user}/${hash}/pull/1`)}`
+                )
+            );
+
+            await bash("git checkout main");
+            console.log(chalk.green("Checked back into main branch without popped changes"));
         } catch {
             console.log(chalk.yellow("Failed to automatically create PR. Please create it manually."));
         }
-
-        await bash("git checkout main");
     }
 }
