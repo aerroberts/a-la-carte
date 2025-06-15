@@ -23,24 +23,7 @@ export async function bashInNewTerminal(dir: string, command: string): Promise<v
 
     const scriptPath = join(scriptDir, "run_bash.sh");
 
-    // Create a proper bash script with better terminal handling
-    const scriptContent = `#!/bin/bash
-
-# Set up clean terminal environment
-export TERM=\${TERM:-xterm-256color}
-export COLORTERM=\${COLORTERM:-truecolor}
-
-# Clear screen and move to directory
-clear
-cd "${dir}"
-
-# Execute the command with proper environment
-${command}
-
-echo ""
-echo "Press any key to close..."
-read -n 1
-`;
+    const scriptContent = `#!/bin/bash\nclear\ncd "${dir}"\n${command}\n`;
 
     await bash(`cat > ${scriptPath} << 'EOF'\n${scriptContent}EOF`);
     await bash(`chmod +x ${scriptPath}`);
