@@ -1,3 +1,6 @@
-For the following request, please solve it and then open a github PR for me once you are confident that the solution is correct. Make sure to create a separate branch for the PR and credit yourself for the work in the pr description. When you create your branch, name the branch something like @ai/[todays date]/[2-3 word description of the request] like @ai/2025-06-13/add-a-new-feature
+For this request, please solve it and then open a github PR for me once you are confident that the solution is correct. Make sure to create a separate branch for the PR and credit yourself for the work in the pr description. When you create your branch, name the branch something like @ai/[todays date]/[2-3 word description of the request] like @ai/2025-06-13/add-a-new-feature
 
-github cli is a bit odd, so you should use this command for reference on creating the pr: gh pr create --base main --head NEWBRANCHNAME --title TITLE --body BODY
+github cli is a bit odd, so you should use this command for reference on creating the pr: 
+```bash
+gh pr create --base main --head NEWBRANCHNAME --title TITLE --body BODY
+```

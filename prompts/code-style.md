@@ -1,6 +1,3 @@
-
-# Typescript Code Style
-
 When we are writing typescript projects, its important that we follow a clear structure and style guidance.
 Adhearance to this gives us better quality code in the long run. Since much of the code will be AI generated, sticking to these rules will help us maintain the codebase.
 
