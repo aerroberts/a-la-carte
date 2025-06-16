@@ -48,8 +48,9 @@ export async function invokeModel(provider: "anthropic" | "openai" | "gemini", i
         return "";
     }
 
+    const tokensPerSecond = (response.metadata.outputTokens / response.metadata.timeTaken) * 1000;
     Log.log(
-        `${provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms`
+        `${provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
     );
 
     // Extract the <generative-solution> tag if it exists
