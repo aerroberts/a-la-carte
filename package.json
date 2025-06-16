@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.54.0",
+    "@google/generative-ai": "^0.21.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.3",
     "commander": "^14.0.0",

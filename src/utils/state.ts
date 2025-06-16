@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import chalk from "chalk";
 import { Log } from "./logger";
 
 export class ConfigManager {
@@ -45,6 +46,7 @@ export class ConfigManager {
                 Log.error(`Key ${key} not found in config and no default value provided, please set it first`);
                 process.exit(1);
             }
+            Log.log(`Key ${key} not found in config, using default value: ${chalk.whiteBright(defaultValue)}`);
             return defaultValue;
         }
         return value;
