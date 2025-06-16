@@ -1,8 +1,4 @@
----
-description: 
-globs: 
-alwaysApply: true
----
+
 # Prefered Stack
 
 I am opinionated on what technology I want to use. When implementing something, always follow the current stack within the repo and dont migrate to others unless otherwise directed.
