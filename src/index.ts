@@ -6,6 +6,7 @@ import { askCodexAiHandler } from "./commands/ai/ask-codex";
 import { describePrAiHandler } from "./commands/ai/describe-pr";
 import { invokeAiHandler } from "./commands/ai/invoke";
 import { popCodeHandler } from "./commands/code/pop";
+import { purgeCodeHandler } from "./commands/code/purge";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { listPromptsConfigHandler } from "./commands/config/list-prompts";
@@ -34,6 +35,10 @@ function main() {
         .description("Pop the latest git stash")
         .argument("[message]", "The message to commit with")
         .action((message?: string) => popCodeHandler({ message }));
+
+    code.command("purge")
+        .description("Force resets the repo to the current state of remote, destructively removing all local changes")
+        .action(() => purgeCodeHandler({}));
 
     code.command("watch")
         .description("Watches files matching a pattern and runs a command on change")
