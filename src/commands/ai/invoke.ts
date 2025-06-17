@@ -5,8 +5,6 @@ import { Config } from "../../utils/state";
 export interface InvokeArgs {
     inputFilePath: string;
     outputFilePath: string;
-    provider?: "anthropic" | "openai" | "gemini";
-    model?: string;
     prompts?: string[];
 }
 

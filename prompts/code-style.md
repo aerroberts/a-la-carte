@@ -233,3 +233,12 @@ describe('Dragons', () => {
     });
 });
 ```
+
+## Testing Aproaches
+
+We have a few golden rules for testing:
+
+1. Tests should not mock the system, mocks are failures of implementation to be modular.
+2. Tests should not use beforeEach or afterEach, as they are unreadable and unmaintainable. Well written tests dont need them.
+3. Tests should snapshot key objects and values to provide visibility. If we are asserting 5 times, we should snapshot 1x instead.
+4. Tests cases should be max of 10 lines. Any more than that and we should break them out into multiple tests and reconsider underlying implementation to be more testable.

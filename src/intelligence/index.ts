@@ -32,7 +32,7 @@ export async function invokeModel(provider: "anthropic" | "openai" | "gemini", i
             },
         });
     } else if (provider === "gemini") {
-        const geminiModelId = Config.loadKey<string>("gemini-model", "gemini-2.0-flash-001");
+        const geminiModelId = Config.loadKey<string>("gemini-model", "gemini-2.5-flash-preview-05-20");
         const geminiAuth = Config.loadKey<string>("gemini-api-key");
         response = await new GeminiProvider().invoke({
             inputString: input,

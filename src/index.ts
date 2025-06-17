@@ -5,6 +5,7 @@ import { askClaudeAiHander } from "./commands/ai/ask-claude";
 import { askCodexAiHandler } from "./commands/ai/ask-codex";
 import { describePrAiHandler } from "./commands/ai/describe-pr";
 import { invokeAiHandler } from "./commands/ai/invoke";
+import { translateAiHandler } from "./commands/ai/translate";
 import { popCodeHandler } from "./commands/code/pop";
 import { purgeCodeHandler } from "./commands/code/purge";
 import { shoveCodeHandler } from "./commands/code/shove";
@@ -140,6 +141,20 @@ function main() {
         .argument("<output>", "Path where the AI response will be written")
         .action((input: string, output: string, options: { prompt: string[] }) =>
             invokeAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
+        );
+
+    ai.command("translate")
+        .description("Translate the input file to the output file")
+        .argument("<input>", "Path to the input file")
+        .argument("<output>", "Path where the translated file will be written")
+        .option(
+            "-p, --prompt <name>",
+            "Load a prompt from the config system (can be used multiple times)",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .action((input: string, output: string, options: { prompt: string[] }) =>
+            translateAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
         );
 
     program.parse();
