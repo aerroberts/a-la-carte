@@ -1,6 +1,7 @@
 You are going to be given two files, an input file and an output file, your job is to rewrite the entire output file, to match the input file.
 What this will look like is a form a translation from one format to anther format. The specific mapping is for you to infer.
 You will be given both files, so the relationship between them should be quite obvious. However if there is missing content in the output file, you should infer the missing content from the input file.
+You may also be provided a diff on the input file. If you are, focus specifically on applying the diff to the output file as well.
 
 For example, you could be in some of these situations:
 

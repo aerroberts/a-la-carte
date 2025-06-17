@@ -14,12 +14,11 @@ export async function codeWatchHandler({ pattern, command }: WatchArgs): Promise
     Log.log(
         `Watching ${chalk.whiteBright(pattern || "**/*")} for changes. Running '${chalk.whiteBright(
             command
-        )}' on change with 1s debounce.`
+        )}' on change.`
     );
     Log.log("Available environment variables: FILE_PATH, FILE_NAME, FILE_DIR, FILE_EXT, FILE_BASE, FILE_BASE_PATH");
 
     const watcher = chokidar.watch(pattern || "**/*", { ignoreInitial: true });
-    let timer: NodeJS.Timeout | null = null;
 
     const runCommand = async (filePath: string) => {
         try {
@@ -74,22 +73,8 @@ export async function codeWatchHandler({ pattern, command }: WatchArgs): Promise
         }
     };
 
-    watcher.on("change", (filePath: string) => {
-        if (timer) {
-            Log.log(". . .");
-            clearTimeout(timer);
-        }
-        timer = setTimeout(() => runCommand(filePath), 1000);
-    });
-
-    // Also handle file additions and deletions if desired
-    watcher.on("add", (filePath: string) => {
-        if (timer) {
-            Log.log(". . .");
-            clearTimeout(timer);
-        }
-        timer = setTimeout(() => runCommand(filePath), 1000);
-    });
+    watcher.on("change", runCommand);
+    watcher.on("add", runCommand);
 
     // Keep the process alive by never resolving the promise
     await new Promise(() => {});

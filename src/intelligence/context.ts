@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { Log } from "../utils/logger";
 import { loadPrompt } from "../utils/prompts";
 import { Config } from "../utils/state";
 
@@ -28,6 +29,13 @@ export class ModelContext {
     }
 
     public addRequestFromFile(filePath: string) {
+        if (!existsSync(filePath)) {
+            Log.warning(`File ${filePath} does not exist, including a blank file`);
+            this.context.push(
+                `# User Request (${filePath}) \n\nPlease now use the following as the user provided input:\n<user-request>\nTHIS FILE IS EMPTY CURRENTLY: ${filePath}\n</user-request>`
+            );
+            return this;
+        }
         const fileContent = readFileSync(filePath, "utf-8");
         this.context.push(
             `# User Request (${filePath}) \n\nPlease now use the following as the user provided input:\n<user-request>\n${fileContent}\n</user-request>`

@@ -153,8 +153,14 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
-        .action((input: string, output: string, options: { prompt: string[] }) =>
-            translateAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
+        .option("-w, --watch", "Watch the input file and automatically translate it to the output file")
+        .action((input: string, output: string, options: { prompt: string[]; watch?: boolean }) =>
+            translateAiHandler({
+                inputFilePath: input,
+                outputFilePath: output,
+                prompts: options.prompt,
+                watch: options.watch,
+            })
         );
 
     program.parse();
