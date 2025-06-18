@@ -8,13 +8,14 @@ export class GeminiProvider implements ModelProvider {
         functionDeclarations: [
             {
                 name: "provide_solution",
-                description: "Provide the solution or response to the user's query as a clean string",
+                description: "Provide the specific requested solution to the user's query as a clean string",
                 parameters: {
                     type: SchemaType.OBJECT,
                     properties: {
                         response: {
                             type: SchemaType.STRING,
-                            description: "The complete response to the user's query",
+                            description:
+                                "The output string for the specific user request to be programatically consumed. This could be the raw file the user asked you to write if you were asked.",
                         },
                     },
                     required: ["response"],

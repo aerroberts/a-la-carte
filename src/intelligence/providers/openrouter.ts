@@ -8,13 +8,13 @@ export class OpenRouterProvider implements ModelProvider {
         type: "function" as const,
         function: {
             name: "provide_solution",
-            description: "Provide the solution or response to the user's query as a clean string",
+            description: "Provide the specific requested solution to the user's query as a clean string",
             parameters: {
                 type: "object",
                 properties: {
                     response: {
                         type: "string",
-                        description: "The complete response to the user's query",
+                        description: "The output string for the specific user request to be programatically consumed.",
                     },
                 },
                 required: ["response"],

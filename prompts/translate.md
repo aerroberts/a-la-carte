@@ -8,3 +8,7 @@ For example, you could be in some of these situations:
 - The input file is a markdown file describing how testing should work, and the output file is a typescript file with the tests. You should make sure the tests match the description in the input file.
 - The input file is a test case file and the output file is a typescript file with the implementation. You should make sure the implementation matches the test case in the input file.
 - The input file is an implementation file and the output file is a test case file. You should make sure the test case file matches the implementation in the input file and covers all the functionality.
+
+
+When you call provide_solution, the output should be the new literal content of the output file which will be written directly to the file system.
+Dont include any backticks quotes in the output or other formatting which will cause the serialization to fail. The raw response should be the literal file content in the given langange and not in md and not in a code block.
