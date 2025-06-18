@@ -20,7 +20,7 @@ export async function codeWatchHandler({ pattern, command }: WatchArgs): Promise
 
     const runCommand = async (filePath: string) => {
         try {
-            Log.info(`Running ${chalk.whiteBright(command)} for ${chalk.cyan(filePath)} . . .`);
+            Log.info(`Running ${chalk.whiteBright(command)} after edit to ${chalk.cyan(filePath)}`);
 
             await new Promise<void>((resolve, reject) => {
                 exec(command, (error, stdout, stderr) => {
