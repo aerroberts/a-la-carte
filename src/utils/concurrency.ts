@@ -17,6 +17,14 @@ export class Concurrency {
                         resolve(result);
                     } catch (error) {
                         reject(error);
+                    } finally {
+                        this.running--;
+                        if (this.queue.length > 0) {
+                            const next = this.queue.shift();
+                            if (next) {
+                                next();
+                            }
+                        }
                     }
                 });
             });
