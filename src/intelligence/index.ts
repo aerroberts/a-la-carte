@@ -26,6 +26,7 @@ export async function invokeModel(args: InvokeModelArgs) {
         try {
             await invokeModelInternal(args);
         } catch (error) {
+            console.warn(error);
             Log.warning(`Error invoking ${args.provider} model, will result in no output: ${error}`);
         }
     });

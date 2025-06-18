@@ -45,6 +45,10 @@ export class OpenRouterProvider implements ModelProvider {
                     content: input.inputString,
                 },
             ],
+            // @ts-ignore - OpenRouter specific parameter to disable reasoning
+            reasoning: {
+                max_tokens: 128,
+            },
         });
 
         // Extract the tool result
