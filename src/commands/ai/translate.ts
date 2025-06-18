@@ -6,6 +6,7 @@ import { createPatch } from "diff";
 import { glob } from "glob";
 import { invokeModel } from "../../intelligence";
 import { ModelContext } from "../../intelligence/context";
+import { bash } from "../../utils/bash";
 import { loadTranslateConfig, type TranslationAction, type TranslationConfig } from "../../utils/load-translate-config";
 import { Log } from "../../utils/logger";
 
@@ -91,13 +92,17 @@ async function handleAction({ config, action, inputFileDiff }: HandleActionArgs)
         .addUserRequest(
             inputFileDiff ? `I just edited the input file, here is the diff produced:\n\n ${inputFileDiff}` : ""
         )
-        .addUserRequest(`Translate the input file (${action.source}) to the output file (${action.destination})`)
-        .toFile();
+        .addUserRequest(`Translate the input file (${action.source}) to the output file (${action.destination})`);
+
+    for (const bashCommand of config.context?.forFile || []) {
+        const command = await bash(`export FILE_PATH=${action.source} && ${bashCommand}`);
+        context.addContextForFile(action.source, bashCommand, command);
+    }
 
     await invokeModel({
         provider: config.provider,
         modelId: config.modelId,
-        inputFile: context,
+        inputFile: context.toFile(),
         outputFile: action.destination,
     });
 }

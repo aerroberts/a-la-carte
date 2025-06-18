@@ -3,8 +3,8 @@
     "modelId": "google/gemini-2.5-flash-lite-preview-06-17",
     "actions": {
         "refactor": {
-            "source": "src/**/*.ts",
-            "destination": ".ts",
+            "source": "src/types.ts",
+            "destination": "src/types.ts",
             "prompts": ["code-style", "gentle-refactor"]
         },
         "spec-to-class": {
@@ -19,5 +19,10 @@
             "guidance": "Translate the typescript class to a well written test file covering its behavior",
             "prompts": ["code-style"]
         }
+    },
+    "context": {
+        "forFile": [
+            "npx biome lint $FILE_PATH"
+        ]
     }
 }

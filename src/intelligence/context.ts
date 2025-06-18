@@ -7,7 +7,7 @@ export class ModelContext {
     private context: string[] = [];
 
     public addContextSection(title: string, key: string, value: string) {
-        this.context.push(`## ${title}\n\n<${key}>\n${value}\n</${key}>`);
+        this.context.push(`# ${title}\n\n<${key}>\n${value}\n</${key}>`);
         return this;
     }
 
@@ -43,6 +43,13 @@ export class ModelContext {
         const fileContent = readFileSync(filePath, "utf-8");
         this.context.push(
             `# User Request (${filePath}) \n\nPlease now use the following as the user provided input:\n<user-request>\n${fileContent}\n</user-request>`
+        );
+        return this;
+    }
+
+    public addContextForFile(filePath: string, command: string, context: string) {
+        this.context.push(
+            `# Additional Context for \`${filePath}\`\n\nI also ran the following command to get additional context for the file:\n<command>${command}</command>\n\n<result>${context}</result>`
         );
         return this;
     }

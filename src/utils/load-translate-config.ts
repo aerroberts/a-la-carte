@@ -13,6 +13,9 @@ export interface TranslationConfig {
     provider?: "anthropic" | "openai" | "gemini" | "openrouter";
     modelId?: string;
     actions: Record<string, TranslationAction>;
+    context?: {
+        forFile: string[];
+    };
 }
 
 export function loadTranslateConfig(): TranslationConfig {

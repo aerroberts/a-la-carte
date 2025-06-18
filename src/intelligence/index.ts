@@ -110,6 +110,9 @@ async function invokeModelInternal(args: InvokeModelArgs) {
     );
 
     Config.saveToCache(cacheKey, response.outputString);
-    await writeFile(args.outputFile, response.outputString);
+    if (response.outputString) {
+        Log.log(`Skipping writing to ${chalk.whiteBright(args.outputFile)} because model output was empty`);
+        await writeFile(args.outputFile, response.outputString);
+    }
     Log.log(`Output written to ${chalk.whiteBright(args.outputFile)}`);
 }

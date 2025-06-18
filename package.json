@@ -13,6 +13,7 @@
     "link": "npm link",
     "unlink": "npm unlink -g a-la-carte",
     "ci": "npm run lint && npm run format && npm run check && npm run test:ci",
+    "fix": "npm run lint:fix && npm run format:fix && npm run check:fix",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
     "format": "biome format src/",
