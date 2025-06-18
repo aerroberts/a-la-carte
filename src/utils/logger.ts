@@ -14,11 +14,12 @@ export const Log = {
     },
 
     warning(message: string, ...args: unknown[]): void {
-        formatMessage(chalk.yellow, `? ${message}`, ...args);
+        formatMessage(chalk.yellow, `    ? ${message}`, ...args);
     },
 
     error(message: string, ...args: unknown[]): void {
-        formatMessage(chalk.red, `! ${message}`, ...args);
+        formatMessage(chalk.red, `✘ ${message}`, ...args);
+        process.exit(1);
     },
 
     success(message: string, ...args: unknown[]): void {

@@ -151,6 +151,7 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
+        .option("-g, --guidance <guidance>", "Guidance for the AI assistant")
         .argument("<input>", "Path to the input file containing the message")
         .argument("<output>", "Path where the AI response will be written")
         .action((input: string, output: string, options: { prompt: string[] }) =>
@@ -159,20 +160,11 @@ function main() {
 
     ai.command("translate")
         .description("Translate the input file to the output file")
-        .argument("<input>", "Path to the input file")
-        .argument("<output>", "Path where the translated file will be written")
-        .option(
-            "-p, --prompt <name>",
-            "Load a prompt from the config system (can be used multiple times)",
-            (value: string, previous: string[]) => [...previous, value],
-            []
-        )
         .option("-w, --watch", "Watch the input file and automatically translate it to the output file")
-        .action((input: string, output: string, options: { prompt: string[]; watch?: boolean }) =>
+        .argument("<action>", "The action defined in the translation config file to perform")
+        .action((action: string, options: { watch?: boolean }) =>
             translateAiHandler({
-                inputFilePath: input,
-                outputFilePath: output,
-                prompts: options.prompt,
+                action,
                 watch: options.watch,
             })
         );

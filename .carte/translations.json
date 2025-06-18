@@ -1,0 +1,11 @@
+{
+    "provider": "openai",
+    "modelId": "gpt-4o",
+    "actions": {
+        "translate": {
+            "source": "readme.md",
+            "destination": "README-SPANISH.md",
+            "guidance": "Translate this README file to the language specified by the LANG environment variable."
+        }
+    }
+}

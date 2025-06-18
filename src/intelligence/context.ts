@@ -24,6 +24,10 @@ export class ModelContext {
     }
 
     public addUserRequest(userRequest: string) {
+        if (!userRequest) {
+            return this;
+        }
+
         this.addContextSection("user-request", "user-request", userRequest);
         return this;
     }

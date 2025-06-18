@@ -3,70 +3,65 @@ import chokidar from "chokidar";
 import { createPatch } from "diff";
 import { invokeModel } from "../../intelligence";
 import { ModelContext } from "../../intelligence/context";
+import { loadTranslateConfig, type TranslationAction, type TranslationConfig } from "../../utils/load-translate-config";
 import { Log } from "../../utils/logger";
-import { Config } from "../../utils/state";
 
 export interface TranslateArgs {
-    inputFilePath: string;
-    outputFilePath: string;
-    prompts?: string[];
+    action: string;
     watch?: boolean;
 }
 
 export async function translateAiHandler(args: TranslateArgs): Promise<void> {
-    if (args.watch) {
-        await translateAiHandlerWatch(args);
+    Log.info("Starting AI driven code translation");
+
+    const config = loadTranslateConfig();
+    const action = config.actions[args.action];
+
+    if (!action) {
+        Log.error(`Action ${args.action} not found in translations.json`);
+    }
+
+    if (!args.watch) {
+        await handleAction({ config, action });
     } else {
-        await translateAiHandlerNoWatch(args);
+        const watcher = chokidar.watch(action.source, { ignoreInitial: true });
+        let currentInputFile = await readFile(action.source, "utf-8");
+        Log.info(
+            `Watching ${action.source} for changes and automatically translating it to ${action.destination} . . .`
+        );
+        watcher.on("change", async (filePath) => {
+            const newInputFile = await readFile(filePath, "utf-8");
+            const diff = createPatch(action.source, currentInputFile, newInputFile);
+            currentInputFile = newInputFile;
+            Log.info("Changed detected, performing incremental translation.");
+            await handleAction({ config, action, inputFileDiff: diff });
+            Log.success("Translation complete");
+        });
     }
 }
 
-export async function translateAiHandlerNoWatch(args: TranslateArgs): Promise<void> {
-    Log.info("Translating the input file to the output file");
-
-    // Build context
-    const contextFile = new ModelContext()
-        .addPrompts(["translate", ...(args.prompts || [])])
-        .addRequestFromFile(args.inputFilePath)
-        .addRequestFromFile(args.outputFilePath)
-        .addUserRequest(`Translate the input file (${args.inputFilePath}) to the output file (${args.outputFilePath})`)
-        .toFile();
-
-    // Invoke the model
-    const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini" | "openrouter">(
-        "default-provider",
-        "openai"
-    );
-    await invokeModel(defaultProvider, contextFile, args.outputFilePath);
-
-    Log.success("Translation complete");
+interface HandleActionArgs {
+    config: TranslationConfig;
+    action: TranslationAction;
+    inputFileDiff?: string;
 }
 
-export async function translateAiHandlerWatch(args: TranslateArgs): Promise<void> {
-    Log.info("Watching the input file and automatically translating it to the output file");
+async function handleAction({ config, action, inputFileDiff }: HandleActionArgs) {
+    const context = new ModelContext()
+        .addPrompts(["translate", ...(action.prompts || [])])
+        .addUserRequest(action.guidance || "")
+        .addRequestFromFile(action.source)
+        .addRequestFromFile(action.destination)
+        .addUserRequest(
+            inputFileDiff ? `I just edited the input file, here is the diff produced:\n\n ${inputFileDiff}` : ""
+        )
+        .addUserRequest(`Translate the input file (${action.source}) to the output file (${action.destination})`)
+        .toFile();
 
-    let currentInputFile = await readFile(args.inputFilePath, "utf-8");
-    const watcher = chokidar.watch(args.inputFilePath, { ignoreInitial: true });
-
-    watcher.on("change", async (filePath) => {
-        const newInputFile = await readFile(filePath, "utf-8");
-        const diff = createPatch(args.inputFilePath, currentInputFile, newInputFile);
-        currentInputFile = newInputFile;
-        const contextFile = new ModelContext()
-            .addPrompts(["translate", ...(args.prompts || [])])
-            .addRequestFromFile(args.inputFilePath)
-            .addRequestFromFile(args.outputFilePath)
-            .addUserRequest(`I just edited the input file, here is the diff:\n\n ${diff}`)
-            .addUserRequest(
-                `Translate the input file (${args.inputFilePath}) to the output file (${args.outputFilePath})`
-            )
-            .toFile();
-
-        const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini" | "openrouter">(
-            "default-provider",
-            "openai"
-        );
-        await invokeModel(defaultProvider, contextFile, args.outputFilePath);
-        Log.info("Incremental translation complete");
+    await invokeModel({
+        provider: config.provider,
+        modelId: config.modelId,
+        inputFile: context,
+        outputFile: action.destination,
     });
 }
