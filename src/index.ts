@@ -19,7 +19,6 @@ import { setOpenRouterKeyConfigHandler } from "./commands/config/set-openrouter-
 import { setOpenRouterModelConfigHandler } from "./commands/config/set-openrouter-model";
 import { showConfigHandler } from "./commands/config/show";
 import { syncRulesConfigHandler } from "./commands/config/sync-rules";
-import { Log } from "./utils/logger";
 
 function main() {
     const program = new Command();
