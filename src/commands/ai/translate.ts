@@ -33,7 +33,10 @@ export async function translateAiHandlerNoWatch(args: TranslateArgs): Promise<vo
         .toFile();
 
     // Invoke the model
-    const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini">("default-provider", "openai");
+    const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini" | "openrouter">(
+        "default-provider",
+        "openai"
+    );
     await invokeModel(defaultProvider, contextFile, args.outputFilePath);
 
     Log.success("Translation complete");
@@ -59,7 +62,10 @@ export async function translateAiHandlerWatch(args: TranslateArgs): Promise<void
             )
             .toFile();
 
-        const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini">("default-provider", "openai");
+        const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini" | "openrouter">(
+            "default-provider",
+            "openai"
+        );
         await invokeModel(defaultProvider, contextFile, args.outputFilePath);
         Log.info("Incremental translation complete");
     });

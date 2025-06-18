@@ -6,9 +6,11 @@ export interface SetDefaultProviderArgs {
 }
 
 export async function setDefaultProviderConfigHandler({ provider }: SetDefaultProviderArgs): Promise<void> {
-    if (provider !== "openai" && provider !== "claude") {
-        Log.error("Error: Provider must be either 'openai' or 'claude'");
+    if (provider !== "openai" && provider !== "anthropic" && provider !== "gemini" && provider !== "openrouter") {
+        Log.error("Error: Provider must be one of: 'openai', 'anthropic', 'gemini', 'openrouter'");
         return;
     }
+
     Config.setKey("default-provider", provider);
+    Log.log(`Default provider set to: ${provider}`);
 }

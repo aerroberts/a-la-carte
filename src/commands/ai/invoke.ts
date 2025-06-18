@@ -16,6 +16,9 @@ export async function invokeAiHandler(args: InvokeArgs): Promise<void> {
         .toFile();
 
     // Invoke the model
-    const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini">("default-provider", "openai");
+    const defaultProvider = Config.loadKey<"anthropic" | "openai" | "gemini" | "openrouter">(
+        "default-provider",
+        "openai"
+    );
     await invokeModel(defaultProvider, contextFile, args.outputFilePath);
 }

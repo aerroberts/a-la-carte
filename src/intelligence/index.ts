@@ -3,10 +3,14 @@ import chalk from "chalk";
 import { Log } from "../utils/logger";
 import { Config } from "../utils/state";
 import type { ModelProviderOutput } from "./provider";
-import { GeminiProvider, OpenAIProvider } from "./providers";
+import { GeminiProvider, OpenAIProvider, OpenRouterProvider } from "./providers";
 import { AnthropicProvider } from "./providers/anthropic";
 
-export async function invokeModel(provider: "anthropic" | "openai" | "gemini", inputFile: string, outputFile: string) {
+export async function invokeModel(
+    provider: "anthropic" | "openai" | "gemini" | "openrouter",
+    inputFile: string,
+    outputFile: string
+) {
     Log.log(`Invoking ${chalk.whiteBright(provider)} model with input file ${chalk.whiteBright(inputFile)}`);
     const input = await readFile(inputFile, "utf-8");
     let response: ModelProviderOutput | undefined;
@@ -41,6 +45,16 @@ export async function invokeModel(provider: "anthropic" | "openai" | "gemini", i
                 apiKey: geminiAuth,
             },
         });
+    } else if (provider === "openrouter") {
+        const openrouterModelId = Config.loadKey<string>("openrouter-model", "openai/gpt-4o");
+        const openrouterAuth = Config.loadKey<string>("openrouter-api-key");
+        response = await new OpenRouterProvider().invoke({
+            inputString: input,
+            modelId: openrouterModelId,
+            auth: {
+                apiKey: openrouterAuth,
+            },
+        });
     }
 
     if (!response) {
@@ -52,12 +66,6 @@ export async function invokeModel(provider: "anthropic" | "openai" | "gemini", i
     Log.log(
         `${provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
     );
-
-    // Extract the <generative-solution> tag if it exists
-    const generativeSolution = response.outputString.match(/<generative-solution>(.*?)<\/generative-solution>/s);
-    if (generativeSolution) {
-        response.outputString = generativeSolution[1].trim();
-    }
 
     await writeFile(outputFile, response.outputString);
     Log.log(`Output written to ${chalk.whiteBright(outputFile)}`);

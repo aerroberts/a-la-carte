@@ -14,6 +14,8 @@ import { listPromptsConfigHandler } from "./commands/config/list-prompts";
 import { setClaudeKeyConfigHandler } from "./commands/config/set-claude-key";
 import { setDefaultProviderConfigHandler } from "./commands/config/set-default-provider";
 import { setOpenAiKeyConfigHandler } from "./commands/config/set-openai-key";
+import { setOpenRouterKeyConfigHandler } from "./commands/config/set-openrouter-key";
+import { setOpenRouterModelConfigHandler } from "./commands/config/set-openrouter-model";
 import { showConfigHandler } from "./commands/config/show";
 import { syncRulesConfigHandler } from "./commands/config/sync-rules";
 
@@ -73,9 +75,21 @@ function main() {
         .action((key: string) => setClaudeKeyConfigHandler({ key }));
 
     config
+        .command("set-openrouter-key")
+        .description("Set your OpenRouter API key")
+        .argument("<key>", "Your OpenRouter API key")
+        .action((key: string) => setOpenRouterKeyConfigHandler({ key }));
+
+    config
+        .command("set-openrouter-model")
+        .description("Set your preferred OpenRouter model (e.g., openai/gpt-4o, anthropic/claude-3-opus)")
+        .argument("<model>", "The OpenRouter model identifier")
+        .action((model: string) => setOpenRouterModelConfigHandler({ model }));
+
+    config
         .command("set-default-provider")
-        .description("Set your default AI provider (openai or claude)")
-        .argument("<provider>", "The AI provider to set as default (openai or claude)")
+        .description("Set your default AI provider (openai, anthropic, gemini, or openrouter)")
+        .argument("<provider>", "The AI provider to set as default (openai, anthropic, gemini, or openrouter)")
         .action((provider: string) => setDefaultProviderConfigHandler({ provider }));
 
     config

@@ -1,8 +1,8 @@
 import { OpenAI } from "openai";
 import type { ModelProvider, ModelProviderInput, ModelProviderOutput } from "../provider";
 
-export class OpenAIProvider implements ModelProvider {
-    name = "openai";
+export class OpenRouterProvider implements ModelProvider {
+    name = "openrouter";
 
     private readonly toolConfig = {
         type: "function" as const,
@@ -24,7 +24,14 @@ export class OpenAIProvider implements ModelProvider {
 
     async invoke(input: ModelProviderInput): Promise<ModelProviderOutput> {
         const startTime = Date.now();
-        const client = new OpenAI(input.auth);
+        const client = new OpenAI({
+            baseURL: "https://openrouter.ai/api/v1",
+            apiKey: input.auth?.apiKey,
+            defaultHeaders: {
+                "HTTP-Referer": "https://a-la-carte.dev",
+                "X-Title": "A La Carte CLI",
+            },
+        });
 
         const response = await client.chat.completions.create({
             model: input.modelId,
