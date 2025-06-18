@@ -22,7 +22,13 @@ export async function invokeModel(args: InvokeModelArgs) {
         ConcurrencyLock = new Concurrency(Config.loadKey<number>("api-concurrency", 1));
     }
 
-    return ConcurrencyLock.run(() => invokeModelInternal(args));
+    return ConcurrencyLock.run(async () => {
+        try {
+            await invokeModelInternal(args);
+        } catch (error) {
+            Log.warning(`Error invoking ${args.provider} model, will result in no output: ${error}`);
+        }
+    });
 }
 
 async function buildCacheKey(args: InvokeModelArgs) {
@@ -95,7 +101,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
 
     if (!response) {
         Log.error(`Failed to invoke ${args.provider} model`);
-        return "";
+        return;
     }
 
     const tokensPerSecond = (response.metadata.outputTokens / response.metadata.timeTaken) * 1000;

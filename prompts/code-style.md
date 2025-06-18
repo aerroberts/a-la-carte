@@ -242,3 +242,11 @@ We have a few golden rules for testing:
 2. Tests should not use beforeEach or afterEach, as they are unreadable and unmaintainable. Well written tests dont need them.
 3. Tests should snapshot key objects and values to provide visibility. If we are asserting 5 times, we should snapshot 1x instead.
 4. Tests cases should be max of 10 lines. Any more than that and we should break them out into multiple tests and reconsider underlying implementation to be more testable.
+
+## Comments are an Anti-pa
+
+Comments are an anti-pattern. They are a failure of implementation to be modular. They are a failure of documentation to be up to date. They are a failure of tests to be self-documenting. They are a failure of code to be self-documenting.
+
+If you need to comment on code, you should probably be refactoring the code to be more self-documenting.
+
+While inline comments are almost always a bad idea, JSDoc is a good thing that can help with code structure and documentation. It allows us to document the codebase and to reason about the codebase more effectively. It allows us to generate documentation from the codebase and to reason about the codebase more effectively.

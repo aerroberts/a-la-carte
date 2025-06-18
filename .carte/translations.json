@@ -1,11 +1,11 @@
 {
     "provider": "openrouter",
-    "modelId": "deepseek/deepseek-r1-distill-llama-70b",
+    "modelId": "google/gemini-2.5-flash-lite-preview-06-17",
     "actions": {
-        "translate": {
-            "source": "*.md",
-            "destination": ".html",
-            "guidance": "Translate the markdown file to a html file"
+        "refactor": {
+            "source": "src/**/*.ts",
+            "destination": ".ts",
+            "prompts": ["code-style", "gentle-refactor"]
         },
         "spec-to-class": {
             "source": "src/**/*.md",
