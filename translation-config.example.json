@@ -1,0 +1,30 @@
+{
+  "modelId": "anthropic/claude-3-sonnet-20241022",
+  "provider": "openrouter",
+  "translationMapping": [
+    {
+      "source": "*.ts",
+      "destination": "test/${file}.test.ts",
+      "prompt": "translate",
+      "customPrompts": ["code-style"],
+      "customString": "Convert this TypeScript file to a comprehensive test file using Jest framework."
+    },
+    {
+      "source": "README.md",
+      "destination": "README-${LANG}.md",
+      "prompt": "translate",
+      "customString": "Translate this README file to the language specified by the LANG environment variable."
+    },
+    {
+      "source": "docs/*.md",
+      "destination": "docs/translated/${file}",
+      "prompt": "translate",
+      "customPrompts": ["shorten"]
+    },
+    {
+      "source": "src/components/*.tsx",
+      "destination": "stories/${file}.stories.tsx",
+      "customString": "Convert this React component to Storybook stories with multiple variants and controls."
+    }
+  ]
+}
