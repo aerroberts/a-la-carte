@@ -14,7 +14,8 @@ export class OpenRouterProvider implements ModelProvider {
                 properties: {
                     response: {
                         type: "string",
-                        description: "The output string for the specific user request to be programatically consumed.",
+                        description:
+                            "The output string for the specific user request to be programatically consumed. This could be the raw file the user asked you to write if you were asked.",
                     },
                 },
                 required: ["response"],
