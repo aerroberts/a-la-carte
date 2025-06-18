@@ -11,6 +11,7 @@ import { purgeCodeHandler } from "./commands/code/purge";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { listPromptsConfigHandler } from "./commands/config/list-prompts";
+import { setApiConcurrencyConfigHandler } from "./commands/config/set-api-concurrency";
 import { setClaudeKeyConfigHandler } from "./commands/config/set-claude-key";
 import { setDefaultProviderConfigHandler } from "./commands/config/set-default-provider";
 import { setOpenAiKeyConfigHandler } from "./commands/config/set-openai-key";
@@ -18,6 +19,7 @@ import { setOpenRouterKeyConfigHandler } from "./commands/config/set-openrouter-
 import { setOpenRouterModelConfigHandler } from "./commands/config/set-openrouter-model";
 import { showConfigHandler } from "./commands/config/show";
 import { syncRulesConfigHandler } from "./commands/config/sync-rules";
+import { Log } from "./utils/logger";
 
 function main() {
     const program = new Command();
@@ -97,6 +99,12 @@ function main() {
         .description("Sync all rules from prompts/rules folder to .cursor/rules in git workspace root")
         .action(() => syncRulesConfigHandler({}));
 
+    config
+        .command("set-api-concurrency")
+        .description("Set the maximum number of concurrent API requests")
+        .argument("<concurrency>", "Maximum number of concurrent API requests (1-100)")
+        .action((concurrency: string) => setApiConcurrencyConfigHandler({ concurrency }));
+
     // ai commands
     ai.command("describe-pr")
         .description("Ask AI to describe a GitHub PR")
@@ -161,11 +169,13 @@ function main() {
     ai.command("translate")
         .description("Translate the input file to the output file")
         .option("-w, --watch", "Watch the input file and automatically translate it to the output file")
+        .option("-i, --ignore-missing", "Ignore missing destination files")
         .argument("<action>", "The action defined in the translation config file to perform")
-        .action((action: string, options: { watch?: boolean }) =>
+        .action((action: string, options: { watch?: boolean; ignoreMissing?: boolean }) =>
             translateAiHandler({
                 action,
                 watch: options.watch,
+                ignoreMissing: options.ignoreMissing,
             })
         );
 

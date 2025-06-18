@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import chalk from "chalk";
 import chokidar from "chokidar";
@@ -11,6 +12,7 @@ import { Log } from "../../utils/logger";
 export interface TranslateArgs {
     action: string;
     watch?: boolean;
+    ignoreMissing?: boolean;
 }
 
 export async function translateAiHandler(args: TranslateArgs): Promise<void> {
@@ -19,26 +21,34 @@ export async function translateAiHandler(args: TranslateArgs): Promise<void> {
     const config = loadTranslateConfig();
     const action = config.actions[args.action];
 
+    // Find all source files
+    const globMatcher = action.source.includes("*");
+    const sourceFileInitialContent: Record<string, string> = {};
+    const sourceFiles = await glob(action.source);
+    Log.log(`Found ${sourceFiles.length} source files: ${chalk.whiteBright(sourceFiles.join(", "))}`);
+    for (const sourceFile of sourceFiles) {
+        sourceFileInitialContent[sourceFile] = await readFile(sourceFile, "utf-8");
+    }
+
     if (!action) {
         Log.error(`Action ${args.action} not found in translations.json`);
     }
 
     if (!args.watch) {
-        if (action.source.includes("*")) {
-            Log.error("Source file contains * which is not supported for non-watch mode");
-            process.exit(1);
-        }
-        await handleAction({ config, action });
-    } else {
-        // Get initial content of all source files
-        const globMatcher = action.source.includes("*");
-        const sourceFileInitialContent: Record<string, string> = {};
-        const sourceFiles = await glob(action.source);
-        Log.log(`Found ${sourceFiles.length} source files to watch: ${chalk.whiteBright(sourceFiles.join(", "))}`);
         for (const sourceFile of sourceFiles) {
-            sourceFileInitialContent[sourceFile] = await readFile(sourceFile, "utf-8");
+            const destination = globMatcher ? sourceFile.split(".")[0] + action.destination : action.destination;
+            const mergedAction: TranslationAction = {
+                ...action,
+                source: sourceFile,
+                destination,
+            };
+            if (!args.ignoreMissing && !existsSync(destination)) {
+                Log.warning(`Destination file ${chalk.whiteBright(destination)} does not exist, skipping translation`);
+                continue;
+            }
+            handleAction({ config, action: mergedAction });
         }
-
+    } else {
         // Setup watcher
         const watcher = chokidar.watch(action.source, { ignoreInitial: true });
         Log.info(
@@ -55,6 +65,10 @@ export async function translateAiHandler(args: TranslateArgs): Promise<void> {
                 source: filePath,
                 destination,
             };
+            if (!args.ignoreMissing && !existsSync(destination)) {
+                Log.warning(`Destination file ${chalk.whiteBright(destination)} does not exist, skipping translation`);
+                return;
+            }
             Log.info(`Changed detected, performing incremental translation to ${chalk.whiteBright(destination)}`);
             await handleAction({ config, action: mergedAction, inputFileDiff: diff });
             Log.success("Translation complete");

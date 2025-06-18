@@ -1,11 +1,23 @@
 {
-    "provider": "openai",
-    "modelId": "gpt-4o",
+    "provider": "openrouter",
+    "modelId": "deepseek/deepseek-r1-distill-llama-70b",
     "actions": {
+        "translate": {
+            "source": "*.md",
+            "destination": ".html",
+            "guidance": "Translate the markdown file to a html file"
+        },
         "spec-to-class": {
-            "source": "src/**/*.spec.md",
+            "source": "src/**/*.md",
             "destination": ".ts",
-            "guidance": "Translate the spec file to a class file"
+            "guidance": "Translate the markdown file to a typescript file containing a single exported class matching its functionality",
+            "prompts": ["code-style"]
+        },
+        "class-to-tests": {
+            "source": "src/**/*.ts",
+            "destination": ".test.ts",
+            "guidance": "Translate the typescript class to a well written test file covering its behavior",
+            "prompts": ["code-style"]
         }
     }
 }

@@ -25,6 +25,14 @@ export class ConfigManager {
         }
     }
 
+    private ensureCacheDir(): void {
+        const dir = dirname(this.configPath);
+        const cacheDir = join(dir, "cache");
+        if (!existsSync(cacheDir)) {
+            mkdirSync(cacheDir, { recursive: true });
+        }
+    }
+
     private getConfig(): Record<string, unknown> {
         try {
             if (existsSync(this.configPath)) {
@@ -76,6 +84,23 @@ export class ConfigManager {
         const tmpPath = join(dir, "tmp", randomId + (extension || ".txt"));
         writeFileSync(tmpPath, content);
         return tmpPath;
+    }
+
+    loadFromCache(key: string): string | undefined {
+        this.ensureCacheDir();
+        const dir = dirname(this.configPath);
+        const tmpPath = join(dir, "cache", key);
+        if (existsSync(tmpPath)) {
+            return readFileSync(tmpPath, "utf-8");
+        }
+        return undefined;
+    }
+
+    saveToCache(key: string, content: string): void {
+        this.ensureCacheDir();
+        const dir = dirname(this.configPath);
+        const tmpPath = join(dir, "cache", key);
+        writeFileSync(tmpPath, content);
     }
 }
 

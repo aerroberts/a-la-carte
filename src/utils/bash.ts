@@ -1,7 +1,7 @@
 import { exec, spawn } from "node:child_process";
 import chalk from "chalk";
 import { Log } from "./logger";
-import { saveToTmp } from "./saveToTmp";
+import { Config } from "./state";
 
 interface BashOptions {
     dir?: string;
@@ -51,7 +51,7 @@ export async function bashInNewTerminal(options: BashInNewTerminalOptions): Prom
         ...Object.entries(options.env || {}).map(([key, value]) => `export ${key}="${value}"`),
         options.command,
     ];
-    const scriptPath = await saveToTmp({ content: lines.join("\n"), extension: ".sh" });
+    const scriptPath = await Config.writeToTmp(lines.join("\n"), ".sh");
     await bash(`chmod +x ${scriptPath}`);
     await bash(`open -a Terminal ${scriptPath}`);
     Log.log(`Running constructed script: ${chalk.whiteBright(scriptPath)}`);
