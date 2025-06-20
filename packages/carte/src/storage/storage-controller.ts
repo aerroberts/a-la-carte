@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { ConfigLoadError } from "../errors";
+import { ConfigLoadError, FileNotFoundError } from "../errors";
 
 export class StorageController {
     private workspaceRoot: string;
@@ -11,14 +11,11 @@ export class StorageController {
         this.globalMetadataRoot = join(process.env.HOME || process.env.USERPROFILE || "/", ".a-la-carte");
 
         // Setup local
-        this.ensureDir(this.workspaceRoot, "tmp");
-        this.ensureDir(this.workspaceRoot, "cache");
-        this.ensureDir(this.workspaceRoot, "metadata");
+        this.ensureDir(this.workspaceRoot, "prompts");
         this.ensureJsonFile(this.workspaceRoot, "config.json");
 
         // Setup global
         this.ensureDir(this.globalMetadataRoot, "tmp");
-        this.ensureDir(this.globalMetadataRoot, "cache");
         this.ensureJsonFile(this.globalMetadataRoot, "config.json");
     }
 
@@ -82,5 +79,13 @@ export class StorageController {
         const tmpPath = join(this.globalMetadataRoot, "tmp", randomId + (extension || ".txt"));
         writeFileSync(tmpPath, content);
         return tmpPath;
+    }
+
+    loadPrompt(name: string): string {
+        const promptPath = join(this.workspaceRoot, "prompts", `${name}.md`);
+        if (!existsSync(promptPath)) {
+            throw new FileNotFoundError(`Prompt ${name} not found in ${this.workspaceRoot}/prompts`);
+        }
+        return readFileSync(promptPath, "utf-8");
     }
 }
