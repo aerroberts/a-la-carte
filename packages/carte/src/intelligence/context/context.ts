@@ -1,3 +1,4 @@
+import { serializeFileCommand } from "./serialize/serialize-file-command";
 import { serializeFileTree } from "./serialize/serialize-file-tree";
 import { serializeFullFile } from "./serialize/serialize-full-file";
 import { serializeNearbyFullFiles } from "./serialize/serialize-nearest-files";
@@ -39,6 +40,16 @@ export class ModelContext {
         return this;
     }
 
+    addCommandFiles(title: string, filePath: string, commands: string[], count: number) {
+        for (const command of commands) {
+            this.addCell({
+                title,
+                body: { type: "command-files", filePath, command, count },
+            });
+        }
+        return this;
+    }
+
     addFileScaffold(title: string, filePath: string) {
         this.addCell({
             title,
@@ -70,14 +81,6 @@ export class ModelContext {
                 body: { type: "included-prompt", promptName },
             });
         }
-        return this;
-    }
-
-    addCommandOutput(command: string, commandPath: string) {
-        this.addCell({
-            title: "Command Output",
-            body: { type: "command-output", command, commandPath },
-        });
         return this;
     }
 
@@ -115,6 +118,9 @@ export class ModelContext {
             }
             if (cell.body.type === "user-request") {
                 joinedContext.push(serializeUserRequest(cell.body.request));
+            }
+            if (cell.body.type === "command-files") {
+                joinedContext.push(await serializeFileCommand(cell.body));
             }
         }
         return joinedContext.join("\n\n");

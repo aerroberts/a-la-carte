@@ -9,10 +9,10 @@ export type ModelContextCellBody =
     | ModelContextCell_FileScaffold
     | ModelContextCell_UserRequest
     | ModelContextCell_IncludedPrompt
-    | ModelContextCell_CommandOutput
     | ModelContextCell_NearbyFullFiles
     | ModelContextCell_NearbyFileScaffolds
-    | ModelContextCell_Section;
+    | ModelContextCell_Section
+    | ModelContextCell_CommandFiles;
 
 export interface ModelContextCell_FileTree {
     type: "file-tree";
@@ -51,14 +51,15 @@ export interface ModelContextCell_IncludedPrompt {
     promptName: string;
 }
 
-export interface ModelContextCell_CommandOutput {
-    type: "command-output";
-    command: string;
-    commandPath: string;
-}
-
 export interface ModelContextCell_Section {
     type: "section";
     title: string;
     description: string;
+}
+
+export interface ModelContextCell_CommandFiles {
+    type: "command-files";
+    filePath: string;
+    command: string;
+    count: number;
 }

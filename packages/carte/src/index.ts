@@ -64,9 +64,24 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
+        .option("-f, --num-full-files <number>", "The number of full files to include", "5")
+        .option("-s, --num-scaffold-files <number>", "The number of nearby files to include for scaffolding", "10")
+        .option(
+            "-c, --commands <command>",
+            "The command to run",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
         .action((target, outputFile, options) =>
             wrapCommand("Building context...", () =>
-                buildContextHandler({ target, outputFile, prompts: options.prompt })
+                buildContextHandler({
+                    target,
+                    outputFile,
+                    prompts: options.prompt,
+                    numFullFiles: options.numFullFiles,
+                    numNearbyFiles: options.numNearbyFiles,
+                    commands: options.commands,
+                })
             )
         );
 
