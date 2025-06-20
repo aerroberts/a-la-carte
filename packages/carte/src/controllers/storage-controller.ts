@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ConfigLoadError, FileNotFoundError } from "../errors";
+import { Log } from "../utils/logger";
 
 export class StorageController {
     private workspaceRoot: string;
@@ -58,6 +59,13 @@ export class StorageController {
         writeFileSync(filePath, JSON.stringify(json, null, 2));
     }
 
+    private jsonKeyExists(root: string, file: string, key: string): boolean {
+        const filePath = join(root, file);
+        const content = readFileSync(filePath, "utf-8");
+        const json = JSON.parse(content);
+        return json[key] !== undefined;
+    }
+
     loadWorkspaceKey<T>(key: string, defaultValue?: T): T {
         return this.loadJsonKey(this.workspaceRoot, "config.json", key, defaultValue);
     }
@@ -72,6 +80,19 @@ export class StorageController {
 
     setGlobalKey(key: string, value: unknown): void {
         this.setJsonKey(this.globalMetadataRoot, "config.json", key, value);
+    }
+
+    loadConfigKey<T>(key: string, defaultValue?: T): T {
+        if (this.jsonKeyExists(this.workspaceRoot, "config.json", key)) {
+            return this.loadJsonKey(this.workspaceRoot, "config.json", key, defaultValue);
+        }
+        if (this.jsonKeyExists(this.globalMetadataRoot, "config.json", key)) {
+            return this.loadJsonKey(this.globalMetadataRoot, "config.json", key, defaultValue);
+        }
+        if (defaultValue === undefined) {
+            throw new ConfigLoadError(`Key '${key}' not found in config and no default value provided`);
+        }
+        return defaultValue;
     }
 
     writeToTmp(content: string, extension?: string): string {

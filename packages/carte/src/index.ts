@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { invokeAiHandler } from "./commands/ai/invoke";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { buildContextHandler } from "./commands/context/build";
@@ -68,6 +69,26 @@ function main() {
         .description("Run a command")
         .argument("<action>", "The action to run")
         .action((action) => wrapCommand("Running action", () => runHandler({ action })));
+
+    // AI commands
+    ai.command("invoke")
+        .description("Invoke an AI model")
+        .argument(
+            "<input-context>",
+            "The file or folder to use as the majority of the input context to ground the model in the workspace"
+        )
+        .argument("<output-file>", "The file to write the output to")
+        .option(
+            "-p, --prompt <name>",
+            "Load a prompt from the prompts folder",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .action((inputContext, outputFile, options) =>
+            wrapCommand("Invoking AI model", () =>
+                invokeAiHandler({ inputContext, outputFile, prompts: options.prompt })
+            )
+        );
 
     program.parse(process.argv);
 }
