@@ -97,7 +97,7 @@ export class StorageController {
 
     writeToTmp(content: string, extension?: string): string {
         const randomId = Math.random().toString(36).substring(2, 15);
-        const tmpPath = join(this.globalMetadataRoot, "tmp", randomId + (extension || ".txt"));
+        const tmpPath = join(this.globalMetadataRoot, "tmp", randomId + (extension || ".md"));
         writeFileSync(tmpPath, content);
         return tmpPath;
     }

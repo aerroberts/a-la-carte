@@ -17,7 +17,6 @@ export async function runHandler(args: RunArgs): Promise<void> {
         throw new ActionNotFoundError(`Action '${args.action}' not found in config`);
     }
 
-    Log.info(`Running action: ${args.action}`);
     const action = actions[args.action];
     if (action.type === "watch") {
         await codeWatchHandler(action.args);

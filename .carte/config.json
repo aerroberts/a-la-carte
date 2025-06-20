@@ -14,7 +14,7 @@
             "args": {
                 "inputContext": "packages/carte/src/index.ts",
                 "tools": ["write-file"],
-                "prompts": ["code-style"],
+                "prompts": ["code-style", "refactor"],
                 "commands": ["npx biome lint $FILE_PATH"],
                 "guidance": "Refactor and improve the code in the complete source files available to you."
             }

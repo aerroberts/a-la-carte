@@ -14,7 +14,11 @@ export const writeFileTool: ModelProviderTool = {
 };
 
 export async function writeFileHandler(params: { path: string; content: string }) {
-    Log.log(`Writing file ${chalk.whiteBright(params.path)}`);
-    const absolutePath = join(process.cwd(), params.path);
-    await writeFile(absolutePath, params.content);
+    try {
+        const absolutePath = join(process.cwd(), params.path);
+        await writeFile(absolutePath, params.content);
+        Log.log(`Wrote file ${chalk.whiteBright(params.path)}`);
+    } catch {
+        Log.warning(`Failed to write file ${chalk.whiteBright(params.path)}, ignoring`);
+    }
 }
