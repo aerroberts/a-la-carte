@@ -79,7 +79,7 @@ function main() {
                     outputFile,
                     prompts: options.prompt,
                     numFullFiles: options.numFullFiles,
-                    numNearbyFiles: options.numNearbyFiles,
+                    numScaffoldFiles: options.numScaffoldFiles,
                     commands: options.commands,
                 })
             )
@@ -116,6 +116,8 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
+        .option("-f, --num-full-files <number>", "The number of full files to include", "5")
+        .option("-s, --num-scaffold-files <number>", "The number of nearby files to include for scaffolding", "10")
         .action((inputContext, options) =>
             wrapCommand("Invoking AI model...", () =>
                 invokeAiHandler({
@@ -124,6 +126,8 @@ function main() {
                     guidance: options.guidance,
                     commands: options.commands,
                     tools: options.tools,
+                    numFullFiles: options.numFullFiles,
+                    numScaffoldFiles: options.numScaffoldFiles,
                 })
             )
         );

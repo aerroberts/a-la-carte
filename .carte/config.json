@@ -16,7 +16,9 @@
                 "tools": ["write-file"],
                 "prompts": ["code-style", "refactor"],
                 "commands": ["npx biome lint $FILE_PATH"],
-                "guidance": "Refactor and improve the code in the complete source files available to you."
+                "guidance": "Refactor and improve the code in the complete source files available to you.",
+                "numFullFiles": 10,
+                "numScaffoldFiles": 30
             }
         }
     }

@@ -9,7 +9,7 @@ export interface BuildContextArgs {
     outputFile: string;
     prompts: string[];
     numFullFiles: number;
-    numNearbyFiles: number;
+    numScaffoldFiles: number;
     commands: string[];
 }
 
@@ -21,7 +21,7 @@ export async function buildContextHandler(args: BuildContextArgs) {
         .addSection("Workspace Structure", "Here is the structure of the workspace.")
         .addFileTree(dirPath)
         .addSection("Relevant File Scaffolds", "Here are some file details that are useful to the current task.")
-        .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, args.numNearbyFiles)
+        .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, args.numScaffoldFiles)
         .addNearbyFullFiles("Relevant File Contents", filePath, args.numFullFiles)
         .addCommandFiles("Relevant Command Outputs", filePath, args.commands, args.numFullFiles)
         .addIncludedPrompts(args.prompts)

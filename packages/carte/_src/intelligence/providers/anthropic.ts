@@ -26,7 +26,7 @@ export class AnthropicProvider implements ModelProvider {
 
         const response = await client.messages.create({
             model: input.modelId,
-            max_tokens: 2000,
+            max_tokens: 20_000,
             tools: [this.toolConfig],
             tool_choice: { type: "tool", name: "provide_solution" },
             messages: [

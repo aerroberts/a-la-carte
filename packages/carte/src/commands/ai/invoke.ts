@@ -9,6 +9,9 @@ export interface InvokeAiArgs {
     tools?: string[];
     guidance?: string;
     commands?: string[];
+
+    numFullFiles: number;
+    numScaffoldFiles: number;
 }
 
 export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
@@ -18,9 +21,9 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
         .addSection("Workspace Structure", "Here is the structure of the workspace.")
         .addFileTree(dirPath)
         .addSection("Relevant File Scaffolds", "Here are some file details that are useful to the current task.")
-        .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, 10)
-        .addNearbyFullFiles("Relevant File Contents", filePath, 5)
-        .addCommandFiles("Relevant Command Outputs", filePath, args.commands || [], 5)
+        .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, args.numScaffoldFiles)
+        .addNearbyFullFiles("Relevant File Contents", filePath, args.numFullFiles)
+        .addCommandFiles("Relevant Command Outputs", filePath, args.commands || [], args.numFullFiles)
         .addSection(
             "Steering Guidance",
             "Below is the guidance for the task you are performing. Its general information from the user to pay attention to"

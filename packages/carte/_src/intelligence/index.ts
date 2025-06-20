@@ -107,7 +107,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
 
     const tokensPerSecond = (response.metadata.outputTokens / response.metadata.timeTaken) * 1000;
     Log.log(
-        `${args.provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
+        `${args.provider} model responded with ${response.metadata.outputTokens} tokens (input tokens: ${response.metadata.inputTokens}) in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
     );
 
     Config.saveToCache(cacheKey, response.outputString);

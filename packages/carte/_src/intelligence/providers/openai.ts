@@ -29,7 +29,6 @@ export class OpenAIProvider implements ModelProvider {
 
         const response = await client.chat.completions.create({
             model: input.modelId,
-            max_tokens: 2000,
             tools: [this.toolConfig],
             tool_choice: { type: "function", function: { name: "provide_solution" } },
             messages: [

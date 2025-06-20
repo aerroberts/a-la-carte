@@ -36,7 +36,6 @@ export class OpenRouterProvider implements ModelProvider {
 
         const response = await client.chat.completions.create({
             model: input.modelId,
-            max_tokens: 2000,
             tools: [this.toolConfig],
             tool_choice: { type: "function", function: { name: "provide_solution" } },
             messages: [
@@ -45,10 +44,6 @@ export class OpenRouterProvider implements ModelProvider {
                     content: input.inputString,
                 },
             ],
-            // @ts-ignore - OpenRouter specific parameter to disable reasoning
-            reasoning: {
-                max_tokens: 128,
-            },
         });
 
         // Extract the tool result
