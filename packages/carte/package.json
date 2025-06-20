@@ -8,12 +8,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "a code watch -p \"**/*.ts\" \"npm run dev\"",
+    "watch": "a code watch -p \"src/**/*.ts\" \"npm run dev\"",
     "dev": "npm run build && npm link && chmod a+x ./dist/index.js",
     "link": "npm link",
     "unlink": "npm unlink -g carte",
-    "test": "vitest run --coverage --update",
-    "test:ci": "vitest run --coverage",
+    "test": "vitest run --coverage",
+    "test:update": "vitest run --coverage --update",
     "test:view-coverage": "vitest run --coverage; open coverage/index.html"
   },
   "devDependencies": {

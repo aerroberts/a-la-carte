@@ -10,9 +10,10 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "dev": "npm run dev --workspace=carte",
+    "watch": "npm run watch --workspace=carte",
     "link": "npm run link --workspace=carte",
     "unlink": "npm run unlink --workspace=carte",
-    "ci": "npm run lint && npm run format && npm run check && npm run test:ci",
+    "ci": "npm run lint && npm run format && npm run check && npm run test",
     "fix": "npm run lint:fix && npm run format:fix && npm run check:fix",
     "lint": "biome lint packages/*/",
     "lint:fix": "biome lint --write packages/*/",
@@ -21,7 +22,7 @@
     "check": "biome check packages/*/",
     "check:fix": "biome check --write packages/*/",
     "test": "npm run test --workspaces",
-    "test:ci": "npm run test:ci --workspaces",
+    "test:update": "npm run test:update --workspaces",
     "test:view-coverage": "npm run test --workspace=carte && open packages/carte/coverage/index.html"
   },
   "devDependencies": {
