@@ -19,6 +19,7 @@ import { setOpenRouterKeyConfigHandler } from "./commands/config/set-openrouter-
 import { setOpenRouterModelConfigHandler } from "./commands/config/set-openrouter-model";
 import { showConfigHandler } from "./commands/config/show";
 import { syncRulesConfigHandler } from "./commands/config/sync-rules";
+import { generateContextHandler } from "./commands/context/generate";
 
 function main() {
     const program = new Command();
@@ -28,6 +29,7 @@ function main() {
     const code = program.command("code").description("Coding related utilities");
     const config = program.command("config").description("Config rules and prompts management");
     const ai = program.command("ai").description("AI related utilities");
+    const context = program.command("context").description("Context generation utilities");
 
     // code commands
     code.command("shove")
@@ -176,6 +178,37 @@ function main() {
                 watch: options.watch,
                 ignoreMissing: options.ignoreMissing,
             })
+        );
+
+    // context commands
+    context
+        .command("generate")
+        .description("Generate comprehensive context for a file or directory")
+        .option(
+            "-p, --prompt <name>",
+            "Load a prompt from the config system (can be used multiple times)",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .option("-g, --guidance <guidance>", "Inline guidance for context generation")
+        .option("-f, --full <count>", "Number of files to include with full content (default: 10)", "10")
+        .option("-s, --scaffold <count>", "Number of files to include with scaffold content (default: 50)", "50")
+        .argument("<input>", "Path to the input file or directory")
+        .argument("<output>", "Path where the generated context will be written")
+        .action(
+            (
+                input: string,
+                output: string,
+                options: { prompt: string[]; guidance?: string; full: string; scaffold: string }
+            ) =>
+                generateContextHandler({
+                    inputPath: input,
+                    outputPath: output,
+                    prompts: options.prompt,
+                    guidance: options.guidance,
+                    fullContextCount: Number.parseInt(options.full, 10),
+                    scaffoldCount: Number.parseInt(options.scaffold, 10),
+                })
         );
 
     program.parse();

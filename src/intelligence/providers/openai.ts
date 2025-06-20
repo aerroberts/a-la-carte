@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 import type { ModelProvider, ModelProviderInput, ModelProviderOutput } from "../provider";
 
 export class OpenAIProvider implements ModelProvider {
-    name = "openai";
+    public name = "openai";
 
     private readonly toolConfig = {
         type: "function" as const,
