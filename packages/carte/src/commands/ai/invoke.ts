@@ -5,9 +5,10 @@ import { paths } from "../../utils/files";
 
 export interface InvokeAiArgs {
     inputContext: string;
-    outputFile: string;
-    guidance?: string;
     prompts?: string[];
+    tools?: string[];
+    guidance?: string;
+    commands?: string[];
 }
 
 export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
@@ -19,6 +20,7 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
         .addSection("Relevant File Scaffolds", "Here are some file details that are useful to the current task.")
         .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, 10)
         .addNearbyFullFiles("Relevant File Contents", filePath, 5)
+        .addCommandFiles("Relevant Command Outputs", filePath, args.commands || [], 5)
         .addSection(
             "Steering Guidance",
             "Below is the guidance for the task you are performing. Its general information from the user to pay attention to"
@@ -32,5 +34,5 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
         .compile();
 
     const file = await Storage.writeToTmp(context);
-    await invokeModel({ inputFile: file, tools: ["write-file"] });
+    await invokeModel({ inputFile: file, tools: args.tools || ["write-file"] });
 }

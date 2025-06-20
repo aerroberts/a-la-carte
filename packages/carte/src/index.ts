@@ -104,13 +104,26 @@ function main() {
             []
         )
         .option("-g, --guidance <guidance>", "The guidance to use for the AI model")
-        .action((inputContext, outputFile, options) =>
+        .option(
+            "-c, --commands <command>",
+            "The command to run",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .option(
+            "-t, --tools <tool>",
+            "The tool to use",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .action((inputContext, options) =>
             wrapCommand("Invoking AI model...", () =>
                 invokeAiHandler({
                     inputContext,
-                    outputFile,
                     prompts: options.prompt,
                     guidance: options.guidance,
+                    commands: options.commands,
+                    tools: options.tools,
                 })
             )
         );

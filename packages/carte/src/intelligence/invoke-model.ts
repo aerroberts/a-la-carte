@@ -14,7 +14,7 @@ interface InvokeModelArgs {
     provider?: "anthropic" | "openai" | "gemini" | "openrouter";
     modelId?: string;
     inputFile: string;
-    tools?: "write-file"[];
+    tools?: string[];
 }
 
 export async function invokeModel(args: InvokeModelArgs) {

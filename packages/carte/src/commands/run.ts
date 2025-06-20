@@ -2,6 +2,7 @@ import { Storage } from "..";
 import { ActionNotFoundError } from "../errors";
 import { CarteWorkspaceConfig } from "../types";
 import { Log } from "../utils/logger";
+import { invokeAiHandler } from "./ai/invoke";
 import { codeWatchHandler } from "./code/watch";
 import { buildContextHandler } from "./context/build";
 
@@ -23,5 +24,8 @@ export async function runHandler(args: RunArgs): Promise<void> {
     }
     if (action.type === "build-context") {
         await buildContextHandler(action.args);
+    }
+    if (action.type === "invoke-ai") {
+        await invokeAiHandler(action.args);
     }
 }
