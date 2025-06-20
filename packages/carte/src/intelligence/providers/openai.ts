@@ -29,7 +29,6 @@ export class OpenAIProvider implements ModelProvider {
 
         const requestOptions: any = {
             model: input.modelId,
-            max_tokens: 2000,
             messages: [
                 {
                     role: "user",
