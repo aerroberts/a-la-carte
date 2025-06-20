@@ -4,48 +4,68 @@ import type { ModelProvider, ModelProviderInput, ModelProviderOutput } from "../
 export class OpenAIProvider implements ModelProvider {
     public name = "openai";
 
-    private readonly toolConfig = {
-        type: "function" as const,
-        function: {
-            name: "provide_solution",
-            description: "Provide the specific requested solution to the user's query as a clean string",
-            parameters: {
-                type: "object",
-                properties: {
-                    response: {
-                        type: "string",
-                        description:
-                            "The output string for the specific user request to be programatically consumed. This could be the raw file the user asked you to write if you were asked.",
+    private convertToolsToOpenAIFormat(tools: ModelProviderInput["tools"]) {
+        return (
+            tools?.map((tool) => ({
+                type: "function" as const,
+                function: {
+                    name: tool.name,
+                    description: tool.description,
+                    parameters: {
+                        type: "object",
+                        properties: tool.parameters,
+                        required: Object.keys(tool.parameters),
                     },
                 },
-                required: ["response"],
-            },
-        },
-    };
+            })) ?? []
+        );
+    }
 
     async invoke(input: ModelProviderInput): Promise<ModelProviderOutput> {
         const startTime = Date.now();
         const client = new OpenAI(input.auth);
 
-        const response = await client.chat.completions.create({
+        const openaiTools = this.convertToolsToOpenAIFormat(input.tools);
+
+        const requestOptions: any = {
             model: input.modelId,
             max_tokens: 2000,
-            tools: [this.toolConfig],
-            tool_choice: { type: "function", function: { name: "provide_solution" } },
             messages: [
                 {
                     role: "user",
                     content: input.inputString,
                 },
             ],
-        });
+        };
 
-        // Extract the tool result
+        if (openaiTools.length > 0) {
+            requestOptions.tools = openaiTools;
+        }
+
+        const response = await client.chat.completions.create(requestOptions);
+
+        // Extract response - collect all tool calls and text content
         let outputString = "";
-        const toolCall = response.choices[0]?.message?.tool_calls?.[0];
-        if (toolCall?.function?.name === "provide_solution") {
-            const args = JSON.parse(toolCall.function.arguments);
-            outputString = args.response;
+        const toolOutputs: Array<{ name: string; output: Record<string, unknown> }> = [];
+
+        const choice = response.choices[0];
+        const toolCalls = choice?.message?.tool_calls;
+        const textContent = choice?.message?.content;
+
+        if (toolCalls?.length) {
+            for (const toolCall of toolCalls) {
+                toolOutputs.push({
+                    name: toolCall.function.name,
+                    output: JSON.parse(toolCall.function.arguments),
+                });
+            }
+        }
+
+        // Determine output string: prefer text content, fallback to tool outputs
+        if (textContent) {
+            outputString = textContent;
+        } else if (toolOutputs.length > 0) {
+            outputString = toolOutputs.map((tool) => `${tool.name}: ${JSON.stringify(tool.output)}`).join("\n");
         }
 
         return {
@@ -55,6 +75,7 @@ export class OpenAIProvider implements ModelProvider {
                 timeTaken: Date.now() - startTime,
             },
             outputString,
+            toolOutputs: toolOutputs.length > 0 ? toolOutputs : undefined,
         };
     }
 }

@@ -84,9 +84,10 @@ function main() {
             (value: string, previous: string[]) => [...previous, value],
             []
         )
+        .option("-g, --guidance <guidance>", "The guidance to use for the AI model")
         .action((inputContext, outputFile, options) =>
             wrapCommand("Invoking AI model", () =>
-                invokeAiHandler({ inputContext, outputFile, prompts: options.prompt })
+                invokeAiHandler({ inputContext, outputFile, prompts: options.prompt, guidance: options.guidance })
             )
         );
 

@@ -19,7 +19,17 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
         .addSection("Relevant File Scaffolds", "Here are some file details that are useful to the current task.")
         .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, 10)
         .addNearbyFullFiles("Relevant File Contents", filePath, 5)
+        .addSection(
+            "Steering Guidance",
+            "Below is the guidance for the task you are performing. Its general information from the user to pay attention to"
+        )
         .addIncludedPrompts(args.prompts || [])
+
+        .addSection(
+            "User Request",
+            "Below is the specific task details from the user. Pay attention to these details and use them to guide your response."
+        )
+        .addUserRequest(args.guidance || "Follow the request in the steering guidance.")
         .compile();
 
     const file = await Storage.writeToTmp(context);
@@ -27,5 +37,6 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
     await invokeModel({
         inputFile: file,
         outputFile: args.outputFile,
+        tools: ["write-file"],
     });
 }

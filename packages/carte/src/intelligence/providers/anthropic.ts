@@ -4,46 +4,65 @@ import type { ModelProvider, ModelProviderInput, ModelProviderOutput } from "../
 export class AnthropicProvider implements ModelProvider {
     name = "anthropic";
 
-    private readonly toolConfig = {
-        name: "provide_solution",
-        description: "Provide the specific requested solution to the user's query as a clean string",
-        input_schema: {
-            type: "object" as const,
-            properties: {
-                response: {
-                    type: "string" as const,
-                    description:
-                        "The output string for the specific user request to be programatically consumed. This could be the raw file the user asked you to write if you were asked.",
+    private convertToolsToAnthropicFormat(tools: ModelProviderInput["tools"]) {
+        return (
+            tools?.map((tool) => ({
+                name: tool.name,
+                description: tool.description,
+                input_schema: {
+                    type: "object" as const,
+                    properties: tool.parameters,
+                    required: Object.keys(tool.parameters),
                 },
-            },
-            required: ["response"],
-        },
-    };
+            })) ?? []
+        );
+    }
 
     async invoke(input: ModelProviderInput): Promise<ModelProviderOutput> {
         const startTime = Date.now();
         const client = new Anthropic(input.auth);
 
-        const response = await client.messages.create({
+        const anthropicTools = this.convertToolsToAnthropicFormat(input.tools);
+
+        const requestOptions: any = {
             model: input.modelId,
             max_tokens: 2000,
-            tools: [this.toolConfig],
-            tool_choice: { type: "tool", name: "provide_solution" },
             messages: [
                 {
                     role: "user",
                     content: input.inputString,
                 },
             ],
-        });
+        };
 
-        // Extract the tool result
+        if (anthropicTools.length > 0) {
+            requestOptions.tools = anthropicTools;
+        }
+
+        const response = await client.messages.create(requestOptions);
+
+        // Extract response - collect all tool uses and text content
         let outputString = "";
+        const toolOutputs: Array<{ name: string; output: Record<string, unknown> }> = [];
+        const textParts: string[] = [];
+
         for (const content of response.content) {
-            if (content.type === "tool_use" && content.name === "provide_solution") {
-                outputString = (content.input as { response: string }).response;
-                break;
+            if (content.type === "tool_use") {
+                toolOutputs.push({
+                    name: content.name,
+                    output: content.input as Record<string, unknown>,
+                });
             }
+            if (content.type === "text") {
+                textParts.push(content.text);
+            }
+        }
+
+        // Determine output string: prefer text content, fallback to tool outputs
+        if (textParts.length > 0) {
+            outputString = textParts.join("\n");
+        } else if (toolOutputs.length > 0) {
+            outputString = toolOutputs.map((tool) => `${tool.name}: ${JSON.stringify(tool.output)}`).join("\n");
         }
 
         return {
@@ -53,6 +72,7 @@ export class AnthropicProvider implements ModelProvider {
                 timeTaken: Date.now() - startTime,
             },
             outputString,
+            toolOutputs: toolOutputs.length > 0 ? toolOutputs : undefined,
         };
     }
 }

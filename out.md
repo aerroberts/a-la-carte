@@ -1,0 +1,1 @@
+I'll add some fun jokes to the main index file to make the CLI tool more entertaining! Let me add some developer humor to `packages/carte/src/index.ts`:

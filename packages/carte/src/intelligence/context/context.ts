@@ -5,6 +5,7 @@ import { serializeNearbyFileScaffolds } from "./serialize/serialize-nearest-scaf
 import { serializePrompt } from "./serialize/serialize-prompt";
 import { serializeFileScaffold } from "./serialize/serialize-scaffold";
 import { serializeSection } from "./serialize/serialize-section";
+import { serializeUserRequest } from "./serialize/serialize-user-request";
 import type { ModelContextCell } from "./type";
 
 export class ModelContext {
@@ -111,6 +112,9 @@ export class ModelContext {
             }
             if (cell.body.type === "included-prompt") {
                 joinedContext.push(await serializePrompt(cell.body.promptName));
+            }
+            if (cell.body.type === "user-request") {
+                joinedContext.push(serializeUserRequest(cell.body.request));
             }
         }
         return joinedContext.join("\n\n");

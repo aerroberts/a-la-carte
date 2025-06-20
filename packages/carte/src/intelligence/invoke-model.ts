@@ -4,9 +4,10 @@ import chalk from "chalk";
 import { Storage } from "..";
 import { Concurrency } from "../utils/concurrency";
 import { Log } from "../utils/logger";
-import type { ModelProviderOutput } from "./provider";
+import type { ModelProviderOutput, ModelProviderTool } from "./provider";
 import { GeminiProvider, OpenAIProvider, OpenRouterProvider } from "./providers";
 import { AnthropicProvider } from "./providers/anthropic";
+import { writeFileTool } from "./tools/write-file";
 
 let ConcurrencyLock: Concurrency | undefined;
 
@@ -14,7 +15,7 @@ interface InvokeModelArgs {
     provider?: "anthropic" | "openai" | "gemini" | "openrouter";
     modelId?: string;
     inputFile: string;
-    outputFile: string;
+    tools?: "write-file"[];
 }
 
 export async function invokeModel(args: InvokeModelArgs) {
@@ -41,6 +42,12 @@ async function invokeModelInternal(args: InvokeModelArgs) {
         args.modelId = Storage.loadConfigKey<string>("modelId");
     }
 
+    // load tools
+    const tools: ModelProviderTool[] = [];
+    if (args.tools?.includes("write-file")) {
+        tools.push(writeFileTool);
+    }
+
     // invoke the model
     Log.log(`Invoking ${chalk.whiteBright(args.provider)} model with input file ${chalk.whiteBright(args.inputFile)}`);
     const input = await readFile(args.inputFile, "utf-8");
@@ -54,6 +61,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
             auth: {
                 apiKey: anthropicAuth,
             },
+            tools,
         });
     } else if (args.provider === "openai") {
         const openaiAuth = Storage.loadConfigKey<string>("openai-api-key");
@@ -63,6 +71,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
             auth: {
                 apiKey: openaiAuth,
             },
+            tools,
         });
     } else if (args.provider === "gemini") {
         const geminiAuth = Storage.loadConfigKey<string>("gemini-api-key");
@@ -72,6 +81,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
             auth: {
                 apiKey: geminiAuth,
             },
+            tools,
         });
     } else if (args.provider === "openrouter") {
         const openrouterAuth = Storage.loadConfigKey<string>("openrouter-api-key");
@@ -81,6 +91,7 @@ async function invokeModelInternal(args: InvokeModelArgs) {
             auth: {
                 apiKey: openrouterAuth,
             },
+            tools,
         });
     }
 
@@ -94,5 +105,5 @@ async function invokeModelInternal(args: InvokeModelArgs) {
         `${args.provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
     );
 
-    Log.log(`Output written to ${chalk.whiteBright(args.outputFile)}`);
+    // TODO: Handle tool outputs
 }
