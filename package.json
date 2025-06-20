@@ -2,48 +2,31 @@
   "name": "a-la-carte",
   "version": "0.0.1",
   "description": "A hungry developer's toolbox",
-  "main": "dist/index.js",
-  "bin": {
-    "a": "./dist/index.js"
-  },
+  "private": true,
+  "workspaces": [
+    "packages/carte",
+    "test-resources/sample-repo"
+  ],
   "scripts": {
-    "build": "tsc",
-    "watch": "a code watch -p \"src/**/*.ts\" \"npm run dev\"",
-    "dev": "npm run build && npm link && chmod a+x ./dist/index.js",
-    "link": "npm link",
-    "unlink": "npm unlink -g a-la-carte",
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspace=carte",
+    "link": "npm run link --workspace=carte",
+    "unlink": "npm run unlink --workspace=carte",
     "ci": "npm run lint && npm run format && npm run check && npm run test:ci",
     "fix": "npm run lint:fix && npm run format:fix && npm run check:fix",
-    "lint": "biome lint src/",
-    "lint:fix": "biome lint --write src/",
-    "format": "biome format src/",
-    "format:fix": "biome format --write src/",
-    "check": "biome check src/",
-    "check:fix": "biome check --write src/",
-    "test": "vitest run --coverage --update",
-    "test:ci": "vitest run --coverage",
-    "test:view-coverage": "vitest run --coverage; open coverage/index.html"
+    "lint": "biome lint packages/*/",
+    "lint:fix": "biome lint --write packages/*/",
+    "format": "biome format packages/*/",
+    "format:fix": "biome format --write packages/*/",
+    "check": "biome check packages/*/",
+    "check:fix": "biome check --write packages/*/",
+    "test": "npm run test --workspaces",
+    "test:ci": "npm run test:ci --workspaces",
+    "test:view-coverage": "npm run test --workspace=carte && open packages/carte/coverage/index.html"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.0-beta.6",
-    "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.0.0",
     "vitest": "^3.2.4"
-  },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.54.0",
-    "@google/generative-ai": "^0.21.0",
-    "chalk": "^4.1.2",
-    "chokidar": "^3.5.3",
-    "commander": "^14.0.0",
-    "diff": "^8.0.2",
-    "glob": "^11.0.3",
-    "ignore": "^7.0.5",
-    "openai": "^5.5.1",
-    "tree-node-cli": "^1.6.0",
-    "tree-sitter": "^0.21.1",
-    "tree-sitter-typescript": "^0.23.2"
   }
 }

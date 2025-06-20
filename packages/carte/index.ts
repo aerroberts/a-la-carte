@@ -31,6 +31,14 @@ function main() {
     const ai = program.command("ai").description("AI related utilities");
     const context = program.command("context").description("Context generation utilities");
 
+    // Top level commands
+
+    program
+        .command("run")
+        .description("Run an action defined in the config file")
+        .argument("<action>", "The action defined in the config file to perform directly")
+        .action((action: string) => actionHandler({ action }));
+
     // code commands
     code.command("shove")
         .description("Force pushes your local changes to the remote repository")
@@ -166,12 +174,6 @@ function main() {
         .action((input: string, output: string, options: { prompt: string[] }) =>
             invokeAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
         );
-
-    // Run Command
-    code.command("run")
-        .description("Run an action defined in the config file")
-        .argument("<action>", "The action defined in the config file to perform")
-        .action((action: string) => actionHandler({ action }));
 
     // context commands
     context
