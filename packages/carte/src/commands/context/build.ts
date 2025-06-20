@@ -7,6 +7,7 @@ import { Log } from "../../utils/logger";
 export interface BuildContextArgs {
     target: string;
     outputFile: string;
+    prompts: string[];
 }
 
 export async function buildContextHandler(args: BuildContextArgs) {
@@ -19,6 +20,7 @@ export async function buildContextHandler(args: BuildContextArgs) {
         .addSection("Relevant File Scaffolds", "Here are some file details that are useful to the current task.")
         .addNearbyFileScaffolds("Relevant File Scaffolds", filePath, 10)
         .addNearbyFullFiles("Relevant File Contents", filePath, 5)
+        .addIncludedPrompts(args.prompts)
         .compile();
 
     await writeFile(args.outputFile, context, "utf-8");

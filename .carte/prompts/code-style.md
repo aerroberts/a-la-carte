@@ -1,3 +1,5 @@
+## Code Style
+
 When we are writing typescript projects, its important that we follow a clear structure and style guidance.
 Adhearance to this gives us better quality code in the long run. Since much of the code will be AI generated, sticking to these rules will help us maintain the codebase.
 
@@ -7,7 +9,7 @@ The overarching principles we want to be aware of are:
 3. Errors should never be generic. Throw them often, and make them specific. Custom error types allows error handling to be more effective and less flakey.
 4. Tests as specifications. Tests define how you want things to function, what behaviour you expect, and are the effective set of feature requirements of the system.
 
-## Class first approach
+### Class first approach
 
 We want to always jump for classes for constructing the system. This is critical to unlock solid testing.
 Classes should be conceptually structured like below:
@@ -92,7 +94,7 @@ class Dragon {
 ```
 
 
-## Interfaces are king
+### Interfaces are king
 
 Interfaces allow us to reason about the system more abstractly, then enforce that system is correct. 
 Interfaces in typescript are a specific type definition, but what we mean here is the concept of a defined contract between two sections of the system.
@@ -114,7 +116,7 @@ interface AttackAction {
 }
 ```
 
-## Errors should never be generic
+### Errors should never be generic
 
 Errors should be specific to the problem they are solving. This allows us to handle errors more effectively and less flakey.
 
@@ -156,14 +158,14 @@ Since we use errors this way, catch statements can be more specific and handle e
     }
 ```
 
-## Tests as specifications
+### Tests as specifications
 
 When we write tests, there is a very specific structure we want to follow. Imagine first we have a natural language description of the behaviour of the system.
 That could look like this:
 
 ```md
 
-### Dragons:
+#### Dragons:
 - When we have a dragon which is in a residence 
     - It can try to have a baby
         - Success: The dragon will have a baby
@@ -234,7 +236,7 @@ describe('Dragons', () => {
 });
 ```
 
-## Testing Aproaches
+### Testing Aproaches
 
 We have a few golden rules for testing:
 
@@ -243,7 +245,7 @@ We have a few golden rules for testing:
 3. Tests should snapshot key objects and values to provide visibility. If we are asserting 5 times, we should snapshot 1x instead.
 4. Tests cases should be max of 10 lines. Any more than that and we should break them out into multiple tests and reconsider underlying implementation to be more testable.
 
-## Comments are an Anti-pattern
+### Comments are an Anti-pattern
 
 Comments are an anti-pattern. They are a failure of implementation to be modular. They are a failure of documentation to be up to date. They are a failure of tests to be self-documenting. They are a failure of code to be self-documenting.
 

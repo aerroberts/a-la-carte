@@ -62,11 +62,13 @@ export class ModelContext {
         return this;
     }
 
-    addIncludedPrompt(promptName: string) {
-        this.addCell({
-            title: "Included Prompt",
-            body: { type: "included-prompt", promptName },
-        });
+    addIncludedPrompts(promptNames: string[]) {
+        for (const promptName of promptNames) {
+            this.addCell({
+                title: "Included Prompt",
+                body: { type: "included-prompt", promptName },
+            });
+        }
         return this;
     }
 

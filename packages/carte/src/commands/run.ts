@@ -3,6 +3,7 @@ import { ActionNotFoundError } from "../errors";
 import { CarteWorkspaceConfig } from "../types";
 import { Log } from "../utils/logger";
 import { codeWatchHandler } from "./code/watch";
+import { buildContextHandler } from "./context/build";
 
 export interface RunArgs {
     action: string;
@@ -19,5 +20,8 @@ export async function runHandler(args: RunArgs): Promise<void> {
     const action = actions[args.action];
     if (action.type === "watch") {
         await codeWatchHandler(action.args);
+    }
+    if (action.type === "build-context") {
+        await buildContextHandler(action.args);
     }
 }

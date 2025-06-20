@@ -52,8 +52,14 @@ function main() {
         .description("Build a context file")
         .argument("<target>", "The target directory to build the context for")
         .argument("<output-file>", "The file to write the context to")
-        .action((target, outputFile) =>
-            wrapCommand("Building context", () => buildContextHandler({ target, outputFile }))
+        .option(
+            "-p, --prompt <name>",
+            "Load a prompt from the prompts folder",
+            (value: string, previous: string[]) => [...previous, value],
+            []
+        )
+        .action((target, outputFile, options) =>
+            wrapCommand("Building context", () => buildContextHandler({ target, outputFile, prompts: options.prompt }))
         );
 
     // Run command
