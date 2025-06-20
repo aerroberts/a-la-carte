@@ -1,5 +1,4 @@
-import crypto from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import chalk from "chalk";
 import { Storage } from "..";
 import { Concurrency } from "../utils/concurrency";
@@ -7,7 +6,7 @@ import { Log } from "../utils/logger";
 import type { ModelProviderOutput, ModelProviderTool } from "./provider";
 import { GeminiProvider, OpenAIProvider, OpenRouterProvider } from "./providers";
 import { AnthropicProvider } from "./providers/anthropic";
-import { writeFileTool } from "./tools/write-file";
+import { writeFileHandler, writeFileTool } from "./tools/write-file";
 
 let ConcurrencyLock: Concurrency | undefined;
 
@@ -105,5 +104,12 @@ async function invokeModelInternal(args: InvokeModelArgs) {
         `${args.provider} model responded with ${response.metadata.outputTokens} tokens in ${response.metadata.timeTaken}ms (${tokensPerSecond.toFixed(2)} tokens/s)`
     );
 
-    // TODO: Handle tool outputs
+    // Handle tools
+    for (const toolOutput of response.toolOutputs ?? []) {
+        if (toolOutput.name === "write-file") {
+            await writeFileHandler(toolOutput.output as { path: string; content: string });
+        }
+    }
+
+    return response;
 }

@@ -24,7 +24,6 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
             "Below is the guidance for the task you are performing. Its general information from the user to pay attention to"
         )
         .addIncludedPrompts(args.prompts || [])
-
         .addSection(
             "User Request",
             "Below is the specific task details from the user. Pay attention to these details and use them to guide your response."
@@ -33,10 +32,5 @@ export async function invokeAiHandler(args: InvokeAiArgs): Promise<void> {
         .compile();
 
     const file = await Storage.writeToTmp(context);
-
-    await invokeModel({
-        inputFile: file,
-        outputFile: args.outputFile,
-        tools: ["write-file"],
-    });
+    await invokeModel({ inputFile: file, tools: ["write-file"] });
 }

@@ -11,6 +11,9 @@ import { Log } from "./utils/logger";
 
 export const Storage = new StorageController();
 
+/**
+ * Wraps commands with error handling and logging
+ */
 async function wrapCommand(message: string, command: () => Promise<void>): Promise<void> {
     try {
         Log.info(message);
@@ -18,16 +21,20 @@ async function wrapCommand(message: string, command: () => Promise<void>): Promi
         Log.success("Done!");
     } catch (error) {
         const errorInstance = error instanceof Error ? error : new Error(String(error));
-        Log.error(errorInstance.message);
+        Log.error(`Error: ${errorInstance.message}`);
         Log.log(errorInstance.stack ?? "No stack trace available");
     }
 }
 
+/**
+ * Main CLI entry point
+ */
 function main() {
     const program = new Command();
 
-    program.name("a-la-carte").description("A hungry developer's toolbox").version("0.0.1");
+    program.name("a-la-carte").description("A developer's toolbox").version("0.0.1");
 
+    // Create command groups
     const code = program.command("code").description("Coding related utilities");
     const config = program.command("config").description("Config rules and prompts management");
     const ai = program.command("ai").description("AI related utilities");
@@ -38,14 +45,12 @@ function main() {
         .description("Watch for changes and run a command")
         .argument("<pattern>", "Pattern to watch")
         .argument("<command>", "Command to run")
-        .action((pattern, command) =>
-            wrapCommand("Running file watcher", () => codeWatchHandler({ pattern, command }))
-        );
+        .action((pattern, command) => wrapCommand("Starting watch...", () => codeWatchHandler({ pattern, command })));
 
     code.command("shove")
         .description("Force pushes your local changes to the remote repository")
         .argument("[message]", "The message to commit with")
-        .action((message?: string) => wrapCommand("Shoving changes", () => shoveCodeHandler({ message })));
+        .action((message?: string) => wrapCommand("Force pushing changes...", () => shoveCodeHandler({ message })));
 
     // Context commands
     context
@@ -60,7 +65,9 @@ function main() {
             []
         )
         .action((target, outputFile, options) =>
-            wrapCommand("Building context", () => buildContextHandler({ target, outputFile, prompts: options.prompt }))
+            wrapCommand("Building context...", () =>
+                buildContextHandler({ target, outputFile, prompts: options.prompt })
+            )
         );
 
     // Run command
@@ -68,15 +75,12 @@ function main() {
         .command("run")
         .description("Run a command")
         .argument("<action>", "The action to run")
-        .action((action) => wrapCommand("Running action", () => runHandler({ action })));
+        .action((action) => wrapCommand(`Running action '${action}'...`, () => runHandler({ action })));
 
     // AI commands
     ai.command("invoke")
         .description("Invoke an AI model")
-        .argument(
-            "<input-context>",
-            "The file or folder to use as the majority of the input context to ground the model in the workspace"
-        )
+        .argument("<input-context>", "The file or folder to use as input context")
         .argument("<output-file>", "The file to write the output to")
         .option(
             "-p, --prompt <name>",
@@ -86,11 +90,17 @@ function main() {
         )
         .option("-g, --guidance <guidance>", "The guidance to use for the AI model")
         .action((inputContext, outputFile, options) =>
-            wrapCommand("Invoking AI model", () =>
-                invokeAiHandler({ inputContext, outputFile, prompts: options.prompt, guidance: options.guidance })
+            wrapCommand("Invoking AI model...", () =>
+                invokeAiHandler({
+                    inputContext,
+                    outputFile,
+                    prompts: options.prompt,
+                    guidance: options.guidance,
+                })
             )
         );
 
+    // Parse the arguments
     program.parse(process.argv);
 }
 
