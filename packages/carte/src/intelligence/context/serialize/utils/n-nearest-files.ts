@@ -75,8 +75,6 @@ export function findNNearestFiles(targetPath: string, n = 10): string[] {
         return a.localeCompare(b);
     });
 
-    Log.log(`Found ${validFiles.length} files nearby to ${targetPath}`);
-
     return validFiles.slice(0, n);
 }
 

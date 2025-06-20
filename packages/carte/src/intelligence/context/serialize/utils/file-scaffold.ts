@@ -7,7 +7,6 @@ const TypeScriptParser = new Parser();
 TypeScriptParser.setLanguage(TypeScript.typescript);
 
 export function generateFileScaffold(filePath: string): string | null {
-    Log.log(`Generating simple scaffold for ${filePath}`);
     const fileContent = readFileSync(filePath, "utf-8");
     const fileTree = TypeScriptParser.parse(fileContent);
     return extractPublicAPI(fileTree.rootNode, fileContent);
