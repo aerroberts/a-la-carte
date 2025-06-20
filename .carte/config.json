@@ -1,6 +1,6 @@
 {
-    "provider": "anthropic",
-    "modelId": "claude-sonnet-4-20250514",
+    "provider": "openrouter",
+    "modelId": "google/gemini-2.5-pro",
     "actions": {
         "watch": {
             "type": "watch",
@@ -18,7 +18,7 @@
                 "commands": ["npx biome lint $FILE_PATH"],
                 "guidance": "Refactor and improve the code in the complete source files available to you.",
                 "numFullFiles": 10,
-                "numScaffoldFiles": 30
+                "numScaffoldFiles": 50
             }
         }
     }
