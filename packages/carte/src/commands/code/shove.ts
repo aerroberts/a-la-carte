@@ -10,7 +10,6 @@ export interface ShoveArgs {
 export async function shoveCodeHandler(args: ShoveArgs): Promise<void> {
     const origin = await bash("git remote get-url origin --push");
     const originRepo = origin.trim().split("https://github.com/")[1];
-    Log.info(`Shoving changes to ${chalk.whiteBright(originRepo)} . . .`);
 
     await bash("git add -A");
     await bash(`git commit -m "${args.message || "Shoving changes"}"`);
@@ -18,5 +17,4 @@ export async function shoveCodeHandler(args: ShoveArgs): Promise<void> {
 
     await logDiffStats();
     Log.log(`Pushed changes to ${chalk.whiteBright(originRepo)}`);
-    Log.success("Shoved changes");
 }
