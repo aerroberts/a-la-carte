@@ -4,22 +4,20 @@ import chalk from "chalk";
 import chokidar from "chokidar";
 import { createPatch } from "diff";
 import { glob } from "glob";
-import { invokeModel } from "../../intelligence";
-import { ModelContext } from "../../intelligence/context";
-import { bash } from "../../utils/bash";
-import { loadTranslateConfig, type TranslationAction, type TranslationConfig } from "../../utils/load-translate-config";
-import { Log } from "../../utils/logger";
+import { invokeModel } from "../intelligence";
+import { ModelContext } from "../intelligence/context";
+import { bash } from "../utils/bash";
+import { type CarteAction, type CarteConfig, loadCarteConfig } from "../utils/load-config";
+import { Log } from "../utils/logger";
 
-export interface TranslateArgs {
+export interface RunArgs {
     action: string;
-    watch?: boolean;
-    ignoreMissing?: boolean;
 }
 
-export async function translateAiHandler(args: TranslateArgs): Promise<void> {
-    Log.info("Starting AI driven code translation");
+export async function actionHandler(args: RunArgs): Promise<void> {
+    Log.info("Starting AI driven code action");
 
-    const config = loadTranslateConfig();
+    const config = loadCarteConfig();
     const action = config.actions[args.action];
 
     // Find all source files
@@ -35,15 +33,15 @@ export async function translateAiHandler(args: TranslateArgs): Promise<void> {
         Log.error(`Action ${args.action} not found in translations.json`);
     }
 
-    if (!args.watch) {
+    if (!action.watch) {
         for (const sourceFile of sourceFiles) {
             const destination = globMatcher ? sourceFile.split(".")[0] + action.destination : action.destination;
-            const mergedAction: TranslationAction = {
+            const mergedAction: CarteAction = {
                 ...action,
                 source: sourceFile,
                 destination,
             };
-            if (!args.ignoreMissing && !existsSync(destination)) {
+            if (!action.ignoreMissing && !existsSync(destination)) {
                 Log.warning(`Destination file ${chalk.whiteBright(destination)} does not exist, skipping translation`);
                 continue;
             }
@@ -61,12 +59,12 @@ export async function translateAiHandler(args: TranslateArgs): Promise<void> {
             sourceFileInitialContent[filePath] = newInputFile;
             const rootPath = filePath.split(".")[0];
             const destination = globMatcher ? rootPath + action.destination : action.destination;
-            const mergedAction: TranslationAction = {
+            const mergedAction: CarteAction = {
                 ...action,
                 source: filePath,
                 destination,
             };
-            if (!args.ignoreMissing && !existsSync(destination)) {
+            if (!action.ignoreMissing && !existsSync(destination)) {
                 Log.warning(`Destination file ${chalk.whiteBright(destination)} does not exist, skipping translation`);
                 return;
             }
@@ -78,8 +76,8 @@ export async function translateAiHandler(args: TranslateArgs): Promise<void> {
 }
 
 interface HandleActionArgs {
-    config: TranslationConfig;
-    action: TranslationAction;
+    config: CarteConfig;
+    action: CarteAction;
     inputFileDiff?: string;
 }
 

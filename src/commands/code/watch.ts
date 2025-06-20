@@ -1,5 +1,5 @@
 import { exec } from "node:child_process";
-import chalk from "chalk";
+import chalk, { stderr } from "chalk";
 import chokidar from "chokidar";
 import { Log } from "../../utils/logger";
 
@@ -27,9 +27,8 @@ export async function codeWatchHandler({ pattern, command }: WatchArgs): Promise
                     if (error) {
                         Log.fail(`${command} (exit code: ${error.code})`);
                         Log.warning(error.message);
-                        if (stderr) {
-                            Log.log(chalk.red(stderr));
-                        }
+                        Log.log(stdout);
+                        Log.log(chalk.red(stderr));
                         reject(error);
                         return;
                     }

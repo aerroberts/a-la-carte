@@ -5,7 +5,6 @@ import { askClaudeAiHander } from "./commands/ai/ask-claude";
 import { askCodexAiHandler } from "./commands/ai/ask-codex";
 import { describePrAiHandler } from "./commands/ai/describe-pr";
 import { invokeAiHandler } from "./commands/ai/invoke";
-import { translateAiHandler } from "./commands/ai/translate";
 import { popCodeHandler } from "./commands/code/pop";
 import { purgeCodeHandler } from "./commands/code/purge";
 import { shoveCodeHandler } from "./commands/code/shove";
@@ -20,6 +19,7 @@ import { setOpenRouterModelConfigHandler } from "./commands/config/set-openroute
 import { showConfigHandler } from "./commands/config/show";
 import { syncRulesConfigHandler } from "./commands/config/sync-rules";
 import { generateContextHandler } from "./commands/context/generate";
+import { actionHandler } from "./commands/run";
 
 function main() {
     const program = new Command();
@@ -167,18 +167,11 @@ function main() {
             invokeAiHandler({ inputFilePath: input, outputFilePath: output, prompts: options.prompt })
         );
 
-    ai.command("translate")
-        .description("Translate the input file to the output file")
-        .option("-w, --watch", "Watch the input file and automatically translate it to the output file")
-        .option("-i, --ignore-missing", "Ignore missing destination files")
-        .argument("<action>", "The action defined in the translation config file to perform")
-        .action((action: string, options: { watch?: boolean; ignoreMissing?: boolean }) =>
-            translateAiHandler({
-                action,
-                watch: options.watch,
-                ignoreMissing: options.ignoreMissing,
-            })
-        );
+    // Run Command
+    code.command("run")
+        .description("Run an action defined in the config file")
+        .argument("<action>", "The action defined in the config file to perform")
+        .action((action: string) => actionHandler({ action }));
 
     // context commands
     context
