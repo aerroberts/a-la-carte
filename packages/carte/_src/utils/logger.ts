@@ -17,11 +17,16 @@ export const Log = {
         formatMessage(chalk.yellow, `    ? ${message}`, ...args);
     },
 
-    error(message: string, ...args: unknown[]): void {
+    error(message: string, ...args: unknown[]): never {
         formatMessage(chalk.red, `✘ ${message}`, ...args);
+        process.exit(1);
     },
 
     success(message: string, ...args: unknown[]): void {
         formatMessage(chalk.green, `✔ ${message}`, ...args);
+    },
+
+    fail(message: string, ...args: unknown[]): void {
+        formatMessage(chalk.red, `✘ ${message}`, ...args);
     },
 };

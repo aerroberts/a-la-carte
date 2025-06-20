@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { bash } from "./bash/bash";
+import { bash } from "./bash";
 import { Log } from "./logger";
 
 export async function logDiffStats() {

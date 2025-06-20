@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { bash } from "../../utils/bash/bash";
+import { bash } from "../../utils/bash";
 import { logDiffStats } from "../../utils/diff";
 import { Log } from "../../utils/logger";
 
