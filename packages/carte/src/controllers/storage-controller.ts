@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ConfigLoadError, FileNotFoundError } from "../errors";
-import { Log } from "../utils/logger";
 
 export class StorageController {
     private workspaceRoot: string;

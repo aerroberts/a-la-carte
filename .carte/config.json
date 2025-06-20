@@ -1,6 +1,6 @@
 {
     "provider": "openrouter",
-    "modelId": "google/gemini-2.5-pro",
+    "modelId": "google/gemini-2.5-flash",
     "actions": {
         "watch": {
             "type": "watch",
@@ -17,7 +17,7 @@
                 "prompts": ["code-style", "refactor"],
                 "commands": ["npx biome lint $FILE_PATH"],
                 "guidance": "Refactor and improve the code in the complete source files available to you.",
-                "numFullFiles": 10,
+                "numFullFiles": 20,
                 "numScaffoldFiles": 50
             }
         }

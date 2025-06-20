@@ -1,6 +1,6 @@
 import { Storage } from "..";
 import { ActionNotFoundError } from "../errors";
-import { CarteWorkspaceConfig } from "../types";
+import type { CarteWorkspaceConfig } from "../types";
 import { Log } from "../utils/logger";
 import { invokeAiHandler } from "./ai/invoke";
 import { codeWatchHandler } from "./code/watch";

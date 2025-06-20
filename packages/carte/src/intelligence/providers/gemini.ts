@@ -56,7 +56,17 @@ export class GeminiProvider implements ModelProvider {
         const geminiTools = this.convertToolsToGeminiFormat(input.tools);
         const toolNames = input.tools?.map((tool) => tool.name) ?? [];
 
-        const modelOptions: any = {
+        const modelOptions: {
+            model: string;
+            tools?: {
+                functionDeclarations: {
+                    name: string;
+                    description: string;
+                    parameters: { type: SchemaType; properties: Record<string, any>; required: string[] };
+                }[];
+            }[];
+            toolConfig?: { functionCallingConfig: { mode: FunctionCallingMode; allowedFunctionNames: string[] } };
+        } = {
             model: input.modelId,
         };
 
@@ -91,7 +101,7 @@ export class GeminiProvider implements ModelProvider {
         }
 
         // Determine output string: prefer text content, fallback to tool outputs
-        if (textContent && textContent.trim()) {
+        if (textContent?.trim()) {
             outputString = textContent;
         } else if (toolOutputs.length > 0) {
             outputString = toolOutputs.map((tool) => `${tool.name}: ${JSON.stringify(tool.output)}`).join("\n");

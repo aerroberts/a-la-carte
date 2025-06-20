@@ -36,7 +36,6 @@ function main() {
 
     // Create command groups
     const code = program.command("code").description("Coding related utilities");
-    const config = program.command("config").description("Config rules and prompts management");
     const ai = program.command("ai").description("AI related utilities");
     const context = program.command("context").description("Context generation utilities");
 
