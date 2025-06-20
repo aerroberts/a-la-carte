@@ -7,7 +7,7 @@ export class StorageController {
     private globalMetadataRoot: string;
 
     constructor() {
-        this.workspaceRoot = process.cwd();
+        this.workspaceRoot = join(process.cwd(), ".carte");
         this.globalMetadataRoot = join(process.env.HOME || process.env.USERPROFILE || "/", ".a-la-carte");
 
         // Setup local
@@ -41,7 +41,7 @@ export class StorageController {
         if (value === undefined) {
             if (defaultValue === undefined) {
                 throw new ConfigLoadError(
-                    `Key ${key} not found in config and no default value provided, please set it first`
+                    `Key '${key}' not found in config and no default value provided, please set it first`
                 );
             }
             return defaultValue;

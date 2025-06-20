@@ -9,3 +9,4 @@ export class CarteError extends Error {
 
 export class ConfigLoadError extends CarteError {}
 export class FileNotFoundError extends CarteError {}
+export class ActionNotFoundError extends CarteError {}

@@ -2,27 +2,12 @@
     "provider": "openrouter",
     "modelId": "google/gemini-2.5-flash-lite-preview-06-17",
     "actions": {
-        "refactor": {
-            "source": "src/**/*.ts",
-            "destination": ".ts",
-            "prompts": ["code-style", "gentle-refactor"]
-        },
-        "spec-to-class": {
-            "source": "src/**/*.md",
-            "destination": ".ts",
-            "guidance": "Translate the markdown file to a typescript file containing a single exported class matching its functionality",
-            "prompts": ["code-style"]
-        },
-        "class-to-tests": {
-            "source": "src/**/*.ts",
-            "destination": ".test.ts",
-            "guidance": "Translate the typescript class to a well written test file covering its behavior",
-            "prompts": ["code-style"]
+        "watch": {
+            "type": "watch",
+            "args": {
+                "pattern": "packages/carte/**/*.ts",
+                "command": "npm run dev"
+            }
         }
-    },
-    "context": {
-        "forFile": [
-            "npx biome lint $FILE_PATH"
-        ]
     }
 }

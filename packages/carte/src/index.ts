@@ -4,7 +4,8 @@ import { Command } from "commander";
 import { shoveCodeHandler } from "./commands/code/shove";
 import { codeWatchHandler } from "./commands/code/watch";
 import { buildContextHandler } from "./commands/context/build";
-import { StorageController } from "./storage/storage-controller";
+import { runHandler } from "./commands/run";
+import { StorageController } from "./controllers/storage-controller";
 import { Log } from "./utils/logger";
 
 export const Storage = new StorageController();
@@ -54,6 +55,13 @@ function main() {
         .action((target, outputFile) =>
             wrapCommand("Building context", () => buildContextHandler({ target, outputFile }))
         );
+
+    // Run command
+    program
+        .command("run")
+        .description("Run a command")
+        .argument("<action>", "The action to run")
+        .action((action) => wrapCommand("Running action", () => runHandler({ action })));
 
     program.parse(process.argv);
 }
